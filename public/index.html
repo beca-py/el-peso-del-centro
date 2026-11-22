@@ -119,13 +119,15 @@
     .chart-src{padding:.45rem 1.4rem;font-size:.6rem;color:var(--text-light);border-top:1px solid #eee;background:#fafafa}
 
     /* pie */
-    .pie-wrap{display:flex;align-items:center;gap:2rem;width:100%;justify-content:center}
-    .pie-container{width:280px;height:200px;flex-shrink:0;filter:drop-shadow(0 6px 20px rgba(0,0,0,.18))}
-    .pie-legend{display:flex;flex-direction:column;gap:.45rem}
-    .pie-li{display:flex;align-items:center;gap:.5rem;font-size:.72rem;color:var(--text)}
-    .pie-dot{width:12px;height:12px;border-radius:3px;flex-shrink:0;border:1px solid rgba(0,0,0,.12)}
-    .pie-pct{font-family:'Space Mono',monospace;font-weight:600;color:var(--text-light);min-width:42px}
-    .pie-n{font-size:.58rem;color:var(--text-light)}
+    .pie-wrap{display:flex;align-items:center;gap:2.5rem;width:100%;justify-content:center}
+    .pie-container{width:260px;height:260px;flex-shrink:0;filter:drop-shadow(0 4px 16px rgba(0,0,0,.13))}
+    .pie-container svg{overflow:visible}
+    .pie-legend{display:flex;flex-direction:column;gap:.5rem}
+    .pie-li{display:flex;align-items:center;gap:.55rem;font-size:.75rem;color:var(--text)}
+    .pie-li-name{min-width:105px;font-weight:500}
+    .pie-dot{width:14px;height:14px;border-radius:4px;flex-shrink:0}
+    .pie-pct{font-family:'Space Mono',monospace;font-weight:600;color:var(--dark);min-width:42px}
+    .pie-n{font-size:.6rem;color:var(--text-light)}
 
     /* ── MAP SECTION (PROTAGONIST) ── */
     .map-hero{background:var(--dark);padding:0;position:relative}
@@ -303,10 +305,10 @@
       .map-stat-pill{padding:.3rem .6rem}
       .map-stat-pill .val{font-size:.9rem}
       .map-stat-pill .lbl{font-size:.5rem}
-      .pie-wrap{flex-direction:column;gap:1rem}
-      .pie-container{width:240px;height:170px}
-      .pie-legend{flex-direction:row;flex-wrap:wrap;gap:.3rem .7rem;justify-content:center}
-      .pie-li{font-size:.6rem}
+      .pie-wrap{flex-direction:column;gap:1.2rem}
+      .pie-container{width:220px;height:220px}
+      .pie-legend{flex-direction:row;flex-wrap:wrap;gap:.35rem .8rem;justify-content:center}
+      .pie-li{font-size:.62rem}
       .chart-header{padding:1rem 1.1rem .3rem}
       .chart-body{padding:.4rem 1.1rem .6rem}
     }
@@ -926,77 +928,69 @@ carousel.addEventListener('scroll', () => {
   const op=slices.slice(7).reduce((s,d)=>s+d.p,0);
   top.push({n:'Otras',v:ov,p:op});
 
-  // 3D pie chart with gradients
-  const cx=140,cy=80,rx=120,ry=70,depth=28;
-  const vw=280,vh=depth+ry*2+10;
-  const short={
-    'Metropolitana':'RM','Valparaíso':'Valpo.','Biobío':'Biobío',
-    "O'Higgins":"O'Hig.",'La Araucanía':'Arauc.',
-    'Los Lagos':'L.Lagos','Maule':'Maule','Otras':'Otras'
+  // 2D pie with radial gradients (Excel-style)
+  const R=120,cx=130,cy=130,gap=1.2;
+  // vibrant palette — base color + lighter highlight for gradient
+  const cols=[
+    {base:'#C0392B',hi:'#F1948A'}, // rojo
+    {base:'#2980B9',hi:'#85C1E9'}, // azul
+    {base:'#F39C12',hi:'#F9E79F'}, // dorado
+    {base:'#1ABC9C',hi:'#A3E4D7'}, // turquesa
+    {base:'#8E44AD',hi:'#D2B4DE'}, // morado
+    {base:'#E67E22',hi:'#F5CBA7'}, // naranja
+    {base:'#27AE60',hi:'#A9DFBF'}, // verde
+    {base:'#95A5A6',hi:'#D5DBDB'}  // gris
+  ];
+  // display names — same in slices AND legend
+  const names={
+    'Metropolitana':'Metropolitana','Valparaíso':'Valparaíso','Biobío':'Biobío',
+    "O'Higgins":"O'Higgins",'La Araucanía':'Araucanía',
+    'Los Lagos':'Los Lagos','Maule':'Maule','Otras':'Otras'
   };
-  // richer palette
-  const cols=['#B91C3A','#E0637B','#D4A843','#2EA8A8','#7E6CC9','#E8824C','#48A878','#9E9E9E'];
-  // darken helper
-  function dk(hex,f){const r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);return'#'+[r,g,b].map(c=>Math.round(c*f).toString(16).padStart(2,'0')).join('')}
-  function elPt(deg){return[cx+Math.cos(deg*Math.PI/180)*rx,cy+Math.sin(deg*Math.PI/180)*ry]}
+  function pt(deg){return[cx+Math.cos(deg*Math.PI/180)*R,cy+Math.sin(deg*Math.PI/180)*R]}
 
-  let defs='',sides='',faces='',labels='',cumP=0;
-  // gradients + slices
+  let defs='',slicePaths='',lbls='',cumP=0;
   top.forEach((d,i)=>{
-    const c=cols[i],light=dk(c,1.25),dark=dk(c,0.7);
-    defs+=`<linearGradient id="g${i}" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="${light}"/><stop offset="100%" stop-color="${c}"/></linearGradient>`;
+    const c=cols[i];
+    // radial gradient: highlight in upper-left, base color at edge
+    defs+=`<radialGradient id="pg${i}" cx="35%" cy="35%" r="65%"><stop offset="0%" stop-color="${c.hi}" stop-opacity=".9"/><stop offset="100%" stop-color="${c.base}"/></radialGradient>`;
+
     const startA=cumP*3.6-90;
     const endA=(cumP+d.p)*3.6-90;
-    const [x1,y1]=elPt(startA);
-    const [x2,y2]=elPt(endA);
+    // small gap between slices: offset start/end slightly
+    const gapA=gap/(2*Math.PI*R)*360;
+    const sA=startA+gapA/2, eA=endA-gapA/2;
+    const [x1,y1]=pt(sA);
+    const [x2,y2]=pt(eA);
     const big=d.p>50?1:0;
 
-    // 3D side: only draw for visible bottom half (angle between 0 and 180 relative to SVG)
-    const sA=Math.max(startA,0-90),eA=Math.min(endA,180-90);
-    if(eA>sA && endA>-90 && startA<90){
-      const steps=Math.max(2,Math.ceil((eA-sA)/3));
-      let sidePath='';
-      for(let s=0;s<=steps;s++){
-        const a=sA+(eA-sA)*s/steps;
-        const [px,py]=elPt(a);
-        sidePath+=(s===0?'M':'L')+px.toFixed(1)+','+(py+depth).toFixed(1);
-      }
-      for(let s=steps;s>=0;s--){
-        const a=sA+(eA-sA)*s/steps;
-        const [px,py]=elPt(a);
-        sidePath+='L'+px.toFixed(1)+','+py.toFixed(1);
-      }
-      sidePath+='Z';
-      sides+=`<path d="${sidePath}" fill="${dark}" stroke="#222" stroke-width=".8"/>`;
-    }
+    slicePaths+=`<path d="M${cx},${cy} L${x1.toFixed(2)},${y1.toFixed(2)} A${R},${R} 0 ${big} 1 ${x2.toFixed(2)},${y2.toFixed(2)} Z" fill="url(#pg${i})" stroke="white" stroke-width="2"/>`;
 
-    // top face
-    faces+=`<path d="M${cx},${cy} L${x1.toFixed(2)},${y1.toFixed(2)} A${rx},${ry} 0 ${big} 1 ${x2.toFixed(2)},${y2.toFixed(2)} Z" fill="url(#g${i})" stroke="#222" stroke-width="1.2"/>`;
-
-    // label
-    if(d.p>2.5){
+    // label inside
+    const name=names[d.n]||d.n;
+    if(d.p>3){
       const midA=(startA+endA)/2;
-      const dist=d.p>8?0.55:0.7;
-      const lx=cx+Math.cos(midA*Math.PI/180)*rx*dist;
-      const ly=cy+Math.sin(midA*Math.PI/180)*ry*dist;
-      const isLight=i===2||i===5||i===7;
-      const fill=isLight?'#1a1a1a':'#fff';
-      const fs=d.p>15?8:d.p>5?6.5:5.5;
-      labels+=`<text x="${lx.toFixed(1)}" y="${ly.toFixed(1)}" text-anchor="middle" fill="${fill}" font-size="${fs}" font-weight="700" font-family="Inter,sans-serif" paint-order="stroke" stroke="#00000044" stroke-width=".5"><tspan x="${lx.toFixed(1)}" dy="-1">${short[d.n]||d.n}</tspan><tspan x="${lx.toFixed(1)}" dy="${fs*1.2}">${d.p.toFixed(1)}%</tspan></text>`;
+      const dist=d.p>12?R*0.55:R*0.7;
+      const lx=cx+Math.cos(midA*Math.PI/180)*dist;
+      const ly=cy+Math.sin(midA*Math.PI/180)*dist;
+      const fs=d.p>15?7.5:d.p>6?6.2:5.2;
+      // short label for inside: abbreviate only very long names
+      const inName=d.p>12?name:(name.length>7?name.slice(0,6)+'.':name);
+      lbls+=`<text x="${lx.toFixed(1)}" y="${ly.toFixed(1)}" text-anchor="middle" fill="white" font-size="${fs}" font-weight="700" font-family="Inter,sans-serif" paint-order="stroke" stroke="rgba(0,0,0,.35)" stroke-width=".7"><tspan x="${lx.toFixed(1)}" dy="-1">${inName}</tspan><tspan x="${lx.toFixed(1)}" dy="${fs*1.25}">${d.p.toFixed(1)}%</tspan></text>`;
     }
     cumP+=d.p;
   });
 
   el.innerHTML=`<div class="pie-wrap">
     <div class="pie-container">
-      <svg viewBox="0 0 ${vw} ${vh}" width="100%" height="100%" style="overflow:visible">
+      <svg viewBox="0 0 260 260" width="100%" height="100%">
         <defs>${defs}</defs>
-        ${sides}${faces}${labels}
+        ${slicePaths}${lbls}
       </svg>
     </div>
     <div class="pie-legend">${top.map((d,i)=>`<div class="pie-li">
-      <span class="pie-dot" style="background:${cols[i]}"></span>
-      <span style="min-width:100px">${d.n}</span>
+      <span class="pie-dot" style="background:linear-gradient(135deg,${cols[i].hi},${cols[i].base})"></span>
+      <span class="pie-li-name">${names[d.n]||d.n}</span>
       <span class="pie-pct">${d.p.toFixed(1)}%</span>
       <span class="pie-n">(${d.v.toLocaleString('es-CL')})</span>
     </div>`).join('')}</div>
