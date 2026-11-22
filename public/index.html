@@ -118,18 +118,15 @@
     .chart-src{padding:.45rem 1.4rem;font-size:.6rem;color:var(--text-light);border-top:1px solid #eee;background:#fafafa}
 
     /* pie */
-    .pie-wrap{display:flex;align-items:center;gap:1.5rem;flex-wrap:wrap;justify-content:center;width:100%}
-    .pie-circle{width:190px;height:190px;border-radius:50%;box-shadow:0 2px 12px rgba(0,0,0,.08);flex-shrink:0}
-    .pie-legend{display:flex;flex-direction:column;gap:.3rem}
+    .pie-wrap{display:flex;flex-direction:column;align-items:center;gap:1.2rem;width:100%}
+    .pie-container{position:relative;width:260px;height:260px;flex-shrink:0;margin:0 auto}
+    .pie-circle{width:100%;height:100%;border-radius:50%;border:2.5px solid #1a1a1a;box-shadow:0 4px 18px rgba(0,0,0,.12)}
+    .pie-legend{display:flex;flex-wrap:wrap;gap:.35rem .9rem;justify-content:center;max-width:380px}
     .pie-li{display:flex;align-items:center;gap:.35rem;font-size:.65rem;color:var(--text)}
-    .pie-dot{width:10px;height:10px;border-radius:2px;flex-shrink:0}
+    .pie-dot{width:10px;height:10px;border-radius:2px;flex-shrink:0;border:1px solid rgba(0,0,0,.15)}
     .pie-pct{font-family:'Space Mono',monospace;font-weight:600;color:var(--text-light);min-width:38px}
     .pie-n{font-size:.55rem;color:var(--text-light)}
-
-    /* pie labels inside */
-    .pie-container{position:relative;width:240px;height:240px;flex-shrink:0}
-    .pie-circle{width:100%;height:100%;border-radius:50%;box-shadow:0 2px 12px rgba(0,0,0,.08)}
-    .pie-label{position:absolute;font-size:.52rem;font-weight:700;color:white;text-shadow:0 1px 3px rgba(0,0,0,.4);pointer-events:none;white-space:nowrap;transform:translate(-50%,-50%)}
+    .pie-label{position:absolute;font-size:.52rem;font-weight:700;color:white;text-shadow:0 1px 3px rgba(0,0,0,.45);pointer-events:none;white-space:nowrap;transform:translate(-50%,-50%);line-height:1.2}
     .pie-label.dark-text{color:var(--dark);text-shadow:none}
 
     /* ── MAP SECTION (PROTAGONIST) ── */
@@ -308,8 +305,8 @@
       .map-stat-pill{padding:.3rem .6rem}
       .map-stat-pill .val{font-size:.9rem}
       .map-stat-pill .lbl{font-size:.5rem}
-      .pie-container{width:180px;height:180px}
-      .pie-label{font-size:.42rem!important}
+      .pie-container{width:200px;height:200px}
+      .pie-label{font-size:.44rem!important}
       .pie-li{font-size:.6rem}
       .chart-header{padding:1rem 1.1rem .3rem}
       .chart-body{padding:.4rem 1.1rem .6rem}
@@ -939,7 +936,7 @@ carousel.addEventListener('scroll', () => {
   });
 
   // position labels at midpoint angle of each slice
-  const R=120; // half of container size (240/2)
+  const R=130; // half of container size (260/2)
   let labels='',cumA=0;
   const short={
     'Metropolitana':'RM','Valparaíso':'Valpo.','Biobío':'Biobío',
