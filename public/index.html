@@ -929,17 +929,17 @@ carousel.addEventListener('scroll', () => {
   top.push({n:'Otras',v:ov,p:op});
 
   // 2D pie with radial gradients (Excel-style)
-  const R=120,cx=130,cy=130,gap=1.2;
-  // vibrant palette — base color + lighter highlight for gradient
+  const R=120,cx=130,cy=130;
+  // palette — base color + subtle lighter tone for soft gradient
   const cols=[
-    {base:'#C0392B',hi:'#F1948A'}, // rojo
-    {base:'#2980B9',hi:'#85C1E9'}, // azul
-    {base:'#F39C12',hi:'#F9E79F'}, // dorado
-    {base:'#1ABC9C',hi:'#A3E4D7'}, // turquesa
-    {base:'#8E44AD',hi:'#D2B4DE'}, // morado
-    {base:'#E67E22',hi:'#F5CBA7'}, // naranja
-    {base:'#27AE60',hi:'#A9DFBF'}, // verde
-    {base:'#95A5A6',hi:'#D5DBDB'}  // gris
+    {base:'#C0392B',hi:'#D98880'}, // rojo
+    {base:'#2980B9',hi:'#5DADE2'}, // azul
+    {base:'#D4AC0D',hi:'#E8D44D'}, // dorado
+    {base:'#1ABC9C',hi:'#48D1B5'}, // turquesa
+    {base:'#7D3C98',hi:'#A569BD'}, // morado
+    {base:'#E67E22',hi:'#EB984E'}, // naranja
+    {base:'#27AE60',hi:'#52BE80'}, // verde
+    {base:'#85929E',hi:'#ABB2B9'}  // gris
   ];
   // display names — same in slices AND legend
   const names={
@@ -952,19 +952,16 @@ carousel.addEventListener('scroll', () => {
   let defs='',slicePaths='',lbls='',cumP=0;
   top.forEach((d,i)=>{
     const c=cols[i];
-    // radial gradient: highlight in upper-left, base color at edge
-    defs+=`<radialGradient id="pg${i}" cx="35%" cy="35%" r="65%"><stop offset="0%" stop-color="${c.hi}" stop-opacity=".9"/><stop offset="100%" stop-color="${c.base}"/></radialGradient>`;
+    // subtle radial gradient: soft highlight center, base at edge
+    defs+=`<radialGradient id="pg${i}" cx="40%" cy="40%" r="60%"><stop offset="0%" stop-color="${c.hi}"/><stop offset="100%" stop-color="${c.base}"/></radialGradient>`;
 
     const startA=cumP*3.6-90;
     const endA=(cumP+d.p)*3.6-90;
-    // small gap between slices: offset start/end slightly
-    const gapA=gap/(2*Math.PI*R)*360;
-    const sA=startA+gapA/2, eA=endA-gapA/2;
-    const [x1,y1]=pt(sA);
-    const [x2,y2]=pt(eA);
+    const [x1,y1]=pt(startA);
+    const [x2,y2]=pt(endA);
     const big=d.p>50?1:0;
 
-    slicePaths+=`<path d="M${cx},${cy} L${x1.toFixed(2)},${y1.toFixed(2)} A${R},${R} 0 ${big} 1 ${x2.toFixed(2)},${y2.toFixed(2)} Z" fill="url(#pg${i})" stroke="white" stroke-width="2"/>`;
+    slicePaths+=`<path d="M${cx},${cy} L${x1.toFixed(2)},${y1.toFixed(2)} A${R},${R} 0 ${big} 1 ${x2.toFixed(2)},${y2.toFixed(2)} Z" fill="url(#pg${i})" stroke="#1a1a1a" stroke-width="2" stroke-linejoin="round"/>`;
 
     // label inside
     const name=names[d.n]||d.n;
@@ -985,7 +982,9 @@ carousel.addEventListener('scroll', () => {
     <div class="pie-container">
       <svg viewBox="0 0 260 260" width="100%" height="100%">
         <defs>${defs}</defs>
-        ${slicePaths}${lbls}
+        ${slicePaths}
+        <circle cx="${cx}" cy="${cy}" r="${R}" fill="none" stroke="#1a1a1a" stroke-width="2.5"/>
+        ${lbls}
       </svg>
     </div>
     <div class="pie-legend">${top.map((d,i)=>`<div class="pie-li">
