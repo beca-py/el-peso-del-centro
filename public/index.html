@@ -86,6 +86,25 @@
     .finding-block h3{font-family:'DM Serif Display',serif;font-size:1.15rem;margin-bottom:.5rem}
     .finding-block p{font-size:.88rem;color:var(--text-light);line-height:1.65}
 
+    /* ── CHARTS ── */
+    .charts-sec{background:var(--dark)}
+    .charts-sec .sec-label{color:var(--gold)}
+    .charts-sec .sec-title{color:white}
+    .charts-sec .sec-desc{color:rgba(255,255,255,.5)}
+    .charts-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-top:2rem}
+    .chart-card{
+      background:white;border-radius:12px;overflow:hidden;
+      box-shadow:0 4px 20px rgba(0,0,0,.15);transition:transform .3s;
+    }
+    .chart-card:hover{transform:translateY(-4px)}
+    .chart-card img{width:100%;height:auto;display:block}
+    .chart-card-caption{
+      padding:.8rem 1.2rem;background:white;
+      font-size:.78rem;color:var(--text-light);line-height:1.5;
+      border-top:2px solid var(--rose-dark);
+    }
+    .chart-card-caption strong{color:var(--text);font-weight:600}
+
     /* ── MAP SECTION (PROTAGONIST) ── */
     .map-hero{background:var(--dark);padding:0;position:relative}
     .map-hero-header{text-align:center;padding:3.5rem 2rem 0}
@@ -243,6 +262,7 @@
       .map-sidebar{max-height:300px}
       .map-container-wrap{height:60vh;min-height:400px}
       .findings-grid{grid-template-columns:1fr}
+      .charts-grid{grid-template-columns:1fr}
       .team-grid{grid-template-columns:1fr}
       .map-stats-overlay{flex-wrap:wrap}
       .region-bar{flex-wrap:nowrap;justify-content:flex-start;padding:.55rem .8rem;gap:.4rem}
@@ -272,6 +292,7 @@
   <ul class="nav-links">
     <li><a href="#inicio" class="active">Inicio</a></li>
     <li><a href="#hallazgo">Hallazgos</a></li>
+    <li><a href="#graficos">Gráficos</a></li>
     <li><a href="#mapa-geo">Mapa de Chile</a></li>
     <li><a href="#implicancias">Implicancias</a></li>
     <li><a href="#equipo">Equipo</a></li>
@@ -374,6 +395,33 @@
       <div class="finding-block">
         <h3>Brecha de especialistas</h3>
         <p>La RM cuenta con 390 especialistas por 100k habitantes. Tarapacá solo tiene 66. Una diferencia de casi 6 veces que compromete la atención en regiones.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CHARTS -->
+<section class="charts-sec sec-full" id="graficos">
+  <div class="sec-inner">
+    <span class="sec-label">Visualizaciones</span>
+    <h2 class="sec-title" style="margin-bottom:.3rem;">Gráficos del análisis</h2>
+    <p class="sec-desc">Resultados clave del estudio de establecimientos y especialistas a nivel regional.</p>
+    <div class="charts-grid">
+      <div class="chart-card">
+        <img src="img/grafico-tasa-100k.jpeg" alt="Tasa de centros de alta complejidad por cada 100k habitantes" loading="lazy">
+        <div class="chart-card-caption"><strong>Tasa per cápita.</strong> Magallanes lidera con 1,20 centros por 100k hab. La RM (0,49) queda al centro de la tabla nacional.</div>
+      </div>
+      <div class="chart-card">
+        <img src="img/grafico-complejidad.jpeg" alt="Distribución de establecimientos por nivel de complejidad" loading="lazy">
+        <div class="chart-card-caption"><strong>Nivel de complejidad.</strong> 9 de cada 10 establecimientos son de baja o mediana complejidad. Solo el 2,4% alcanza la alta complejidad.</div>
+      </div>
+      <div class="chart-card">
+        <img src="img/grafico-rm-lidera.jpeg" alt="La Región Metropolitana lidera la red asistencial en alta complejidad" loading="lazy">
+        <div class="chart-card-caption"><strong>Concentración en la RM.</strong> La Región Metropolitana concentra casi el 6% de establecimientos de alta complejidad, liderando la red asistencial.</div>
+      </div>
+      <div class="chart-card">
+        <img src="img/grafico-especialidades.jpeg" alt="Medicina Interna domina la dotación de especialistas por región" loading="lazy">
+        <div class="chart-card-caption"><strong>Especialidad dominante.</strong> Medicina Interna lidera en casi todas las regiones, con más de 3.100 profesionales solo en la RM.</div>
       </div>
     </div>
   </div>
