@@ -92,6 +92,7 @@
     .charts-sec .sec-title{color:white}
     .charts-sec .sec-desc{color:rgba(255,255,255,.5)}
     .charts-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-top:2rem}
+    .chart-card.chart-full{grid-column:1/-1;max-width:540px;justify-self:center}
     .chart-card{
       background:white;border-radius:12px;overflow:hidden;
       box-shadow:0 4px 20px rgba(0,0,0,.15);transition:transform .3s;
@@ -119,15 +120,12 @@
 
     /* pie */
     .pie-wrap{display:flex;flex-direction:column;align-items:center;gap:1.2rem;width:100%}
-    .pie-container{position:relative;width:260px;height:260px;flex-shrink:0;margin:0 auto}
-    .pie-circle{width:100%;height:100%;border-radius:50%;border:2.5px solid #1a1a1a;box-shadow:0 4px 18px rgba(0,0,0,.12)}
+    .pie-container{width:260px;height:260px;flex-shrink:0;margin:0 auto;filter:drop-shadow(0 4px 14px rgba(0,0,0,.1))}
     .pie-legend{display:flex;flex-wrap:wrap;gap:.35rem .9rem;justify-content:center;max-width:380px}
     .pie-li{display:flex;align-items:center;gap:.35rem;font-size:.65rem;color:var(--text)}
     .pie-dot{width:10px;height:10px;border-radius:2px;flex-shrink:0;border:1px solid rgba(0,0,0,.15)}
     .pie-pct{font-family:'Space Mono',monospace;font-weight:600;color:var(--text-light);min-width:38px}
     .pie-n{font-size:.55rem;color:var(--text-light)}
-    .pie-label{position:absolute;font-size:.52rem;font-weight:700;color:white;text-shadow:0 1px 3px rgba(0,0,0,.45);pointer-events:none;white-space:nowrap;transform:translate(-50%,-50%);line-height:1.2}
-    .pie-label.dark-text{color:var(--dark);text-shadow:none}
 
     /* ── MAP SECTION (PROTAGONIST) ── */
     .map-hero{background:var(--dark);padding:0;position:relative}
@@ -306,7 +304,6 @@
       .map-stat-pill .val{font-size:.9rem}
       .map-stat-pill .lbl{font-size:.5rem}
       .pie-container{width:200px;height:200px}
-      .pie-label{font-size:.44rem!important}
       .pie-li{font-size:.6rem}
       .chart-header{padding:1rem 1.1rem .3rem}
       .chart-body{padding:.4rem 1.1rem .6rem}
@@ -452,7 +449,7 @@
         <div class="chart-img-wrap"><img src="img/grafico-especialidades.jpeg" alt="Medicina Interna domina la dotación de especialistas por región" loading="lazy"></div>
         <div class="chart-card-caption"><strong>Especialidad dominante.</strong> Medicina Interna lidera en casi todas las regiones, con más de 3.100 profesionales solo en la RM.</div>
       </div>
-      <div class="chart-card">
+      <div class="chart-card chart-full">
         <div class="chart-header">
           <h3 class="chart-title">Distribución de especialistas por región</h3>
           <p class="chart-sub">La Región Metropolitana concentra más del 54% de todos los especialistas del país.</p>
@@ -927,42 +924,42 @@ carousel.addEventListener('scroll', () => {
   const op=slices.slice(7).reduce((s,d)=>s+d.p,0);
   top.push({n:'Otras',v:ov,p:op});
 
-  // conic gradient
-  let grad='',cum=0;
-  top.forEach((d,i)=>{
-    grad+=`${pal[i]} ${cum.toFixed(2)}% ${(cum+d.p).toFixed(2)}%`;
-    cum+=d.p;
-    if(i<top.length-1)grad+=',';
-  });
-
-  // position labels at midpoint angle of each slice
-  const R=130; // half of container size (260/2)
-  let labels='',cumA=0;
+  // Build SVG pie with black stroke between slices
+  const R=130,cx=130,cy=130;
+  let svgSlices='',svgLabels='',cumP=0;
   const short={
     'Metropolitana':'RM','Valparaíso':'Valpo.','Biobío':'Biobío',
     "O'Higgins":"O'Hig.",'La Araucanía':'Arauc.',
     'Los Lagos':'L.Lagos','Maule':'Maule','Otras':'Otras'
   };
+  function polPt(deg,r){return[cx+Math.cos(deg*Math.PI/180)*r,cy+Math.sin(deg*Math.PI/180)*r]}
   top.forEach((d,i)=>{
-    const midDeg=cumA+d.p/2;
-    const rad=(midDeg*3.6-90)*Math.PI/180; // convert % to degrees, offset -90
-    // push label toward edge for big slices, closer for small
-    const dist=d.p>8?R*0.62:R*0.78;
-    const x=R+Math.cos(rad)*dist;
-    const y=R+Math.sin(rad)*dist;
-    const name=short[d.n]||d.n;
-    const dark=pal[i]==='#C9A96E'||pal[i]==='#E8A87C'||pal[i]==='#c8c8c8';
-    const fs=d.p>15?'.6rem':d.p>5?'.5rem':'.45rem';
+    const startA=cumP*3.6-90;
+    const endA=(cumP+d.p)*3.6-90;
+    const [x1,y1]=polPt(startA,R);
+    const [x2,y2]=polPt(endA,R);
+    const big=d.p>50?1:0;
+    svgSlices+=`<path d="M${cx},${cy} L${x1.toFixed(2)},${y1.toFixed(2)} A${R},${R} 0 ${big} 1 ${x2.toFixed(2)},${y2.toFixed(2)} Z" fill="${pal[i]}" stroke="#1a1a1a" stroke-width="1.5"/>`;
+    // label inside slice
     if(d.p>2.5){
-      labels+=`<span class="pie-label${dark?' dark-text':''}" style="left:${x.toFixed(0)}px;top:${y.toFixed(0)}px;font-size:${fs}">${name}<br>${d.p.toFixed(1)}%</span>`;
+      const midA=(startA+endA)/2;
+      const dist=d.p>8?R*0.58:R*0.72;
+      const [lx,ly]=polPt(midA,dist);
+      const name=short[d.n]||d.n;
+      const dark=pal[i]==='#C9A96E'||pal[i]==='#E8A87C'||pal[i]==='#c8c8c8';
+      const fill=dark?'#1a1a1a':'#fff';
+      const fs=d.p>15?8:d.p>5?6.5:5.5;
+      svgLabels+=`<text x="${lx.toFixed(1)}" y="${ly.toFixed(1)}" text-anchor="middle" fill="${fill}" font-size="${fs}" font-weight="700" font-family="Inter,sans-serif" style="text-shadow:0 1px 2px rgba(0,0,0,.3)"><tspan x="${lx.toFixed(1)}" dy="0">${name}</tspan><tspan x="${lx.toFixed(1)}" dy="${fs*1.15}">${d.p.toFixed(1)}%</tspan></text>`;
     }
-    cumA+=d.p;
+    cumP+=d.p;
   });
 
   el.innerHTML=`<div class="pie-wrap">
     <div class="pie-container">
-      <div class="pie-circle" style="background:conic-gradient(${grad})"></div>
-      ${labels}
+      <svg viewBox="0 0 260 260" width="100%" height="100%">
+        <circle cx="${cx}" cy="${cy}" r="${R}" fill="none" stroke="#1a1a1a" stroke-width="2.5"/>
+        ${svgSlices}${svgLabels}
+      </svg>
     </div>
     <div class="pie-legend">${top.map((d,i)=>`<div class="pie-li">
       <span class="pie-dot" style="background:${pal[i]}"></span>
