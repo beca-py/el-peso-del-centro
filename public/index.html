@@ -126,15 +126,11 @@
     .pie-pct{font-family:'Space Mono',monospace;font-weight:600;color:var(--text-light);min-width:38px}
     .pie-n{font-size:.55rem;color:var(--text-light)}
 
-    /* waffle */
-    .waffle-wrap{width:100%}
-    .waffle-grid{display:grid;grid-template-columns:repeat(10,1fr);gap:3px;max-width:310px;margin:0 auto .6rem}
-    .waffle-cell{aspect-ratio:1;border-radius:3px;cursor:default;transition:transform .15s}
-    .waffle-cell:hover{transform:scale(1.2);z-index:1}
-    .waffle-leg{display:flex;flex-wrap:wrap;gap:.3rem .7rem;justify-content:center}
-    .waffle-leg span{display:flex;align-items:center;gap:.2rem;font-size:.56rem;color:var(--text-light)}
-    .waffle-leg-dot{width:8px;height:8px;border-radius:2px;flex-shrink:0}
-    .waffle-note{text-align:center;font-size:.58rem;color:var(--text-light);margin-top:.4rem}
+    /* pie labels inside */
+    .pie-container{position:relative;width:240px;height:240px;flex-shrink:0}
+    .pie-circle{width:100%;height:100%;border-radius:50%;box-shadow:0 2px 12px rgba(0,0,0,.08)}
+    .pie-label{position:absolute;font-size:.52rem;font-weight:700;color:white;text-shadow:0 1px 3px rgba(0,0,0,.4);pointer-events:none;white-space:nowrap;transform:translate(-50%,-50%)}
+    .pie-label.dark-text{color:var(--dark);text-shadow:none}
 
     /* ── MAP SECTION (PROTAGONIST) ── */
     .map-hero{background:var(--dark);padding:0;position:relative}
@@ -312,9 +308,9 @@
       .map-stat-pill{padding:.3rem .6rem}
       .map-stat-pill .val{font-size:.9rem}
       .map-stat-pill .lbl{font-size:.5rem}
-      .pie-circle{width:150px;height:150px}
+      .pie-container{width:180px;height:180px}
+      .pie-label{font-size:.42rem!important}
       .pie-li{font-size:.6rem}
-      .waffle-grid{max-width:260px;gap:2px}
       .chart-header{padding:1rem 1.1rem .3rem}
       .chart-body{padding:.4rem 1.1rem .6rem}
     }
@@ -466,14 +462,6 @@
         </div>
         <div class="chart-body" id="chartPie"></div>
         <div class="chart-src">Fuente: RNPI / MINSAL (2026)</div>
-      </div>
-      <div class="chart-card">
-        <div class="chart-header">
-          <h3 class="chart-title">Mapa de hospitales de alta complejidad</h3>
-          <p class="chart-sub">Cada cuadrado representa un centro de alta complejidad.</p>
-        </div>
-        <div class="chart-body" id="chartWaffle"></div>
-        <div class="chart-src">Fuente: DEIS / MINSAL (2026)</div>
       </div>
     </div>
   </div>
@@ -931,7 +919,7 @@ carousel.addEventListener('scroll', () => {
   dots.forEach((d, i) => d.classList.toggle('active', i === cl));
 });
 
-// ═══ PIE CHART: Especialistas ═══
+// ═══ PIE CHART: Especialistas (labels inside slices) ═══
 (function(){
   const el=document.getElementById('chartPie');if(!el)return;
   const total=regionOrder.reduce((s,r)=>s+regionData[r].esp,0);
@@ -940,8 +928,9 @@ carousel.addEventListener('scroll', () => {
   const top=slices.slice(0,7);
   const ov=slices.slice(7).reduce((s,d)=>s+d.v,0);
   const op=slices.slice(7).reduce((s,d)=>s+d.p,0);
-  top.push({n:'Otras regiones',v:ov,p:op});
+  top.push({n:'Otras',v:ov,p:op});
 
+  // conic gradient
   let grad='',cum=0;
   top.forEach((d,i)=>{
     grad+=`${pal[i]} ${cum.toFixed(2)}% ${(cum+d.p).toFixed(2)}%`;
@@ -949,51 +938,41 @@ carousel.addEventListener('scroll', () => {
     if(i<top.length-1)grad+=',';
   });
 
-  const short=n=>n==='Arica y Parinacota'?'Arica y Parina.':n;
+  // position labels at midpoint angle of each slice
+  const R=120; // half of container size (240/2)
+  let labels='',cumA=0;
+  const short={
+    'Metropolitana':'RM','Valparaíso':'Valpo.','Biobío':'Biobío',
+    "O'Higgins":"O'Hig.",'La Araucanía':'Arauc.',
+    'Los Lagos':'L.Lagos','Maule':'Maule','Otras':'Otras'
+  };
+  top.forEach((d,i)=>{
+    const midDeg=cumA+d.p/2;
+    const rad=(midDeg*3.6-90)*Math.PI/180; // convert % to degrees, offset -90
+    // push label toward edge for big slices, closer for small
+    const dist=d.p>8?R*0.62:R*0.78;
+    const x=R+Math.cos(rad)*dist;
+    const y=R+Math.sin(rad)*dist;
+    const name=short[d.n]||d.n;
+    const dark=pal[i]==='#C9A96E'||pal[i]==='#E8A87C'||pal[i]==='#c8c8c8';
+    const fs=d.p>15?'.6rem':d.p>5?'.5rem':'.45rem';
+    if(d.p>2.5){
+      labels+=`<span class="pie-label${dark?' dark-text':''}" style="left:${x.toFixed(0)}px;top:${y.toFixed(0)}px;font-size:${fs}">${name}<br>${d.p.toFixed(1)}%</span>`;
+    }
+    cumA+=d.p;
+  });
+
   el.innerHTML=`<div class="pie-wrap">
-    <div class="pie-circle" style="background:conic-gradient(${grad})"></div>
+    <div class="pie-container">
+      <div class="pie-circle" style="background:conic-gradient(${grad})"></div>
+      ${labels}
+    </div>
     <div class="pie-legend">${top.map((d,i)=>`<div class="pie-li">
       <span class="pie-dot" style="background:${pal[i]}"></span>
-      <span style="min-width:95px">${short(d.n)}</span>
+      <span style="min-width:95px">${d.n}</span>
       <span class="pie-pct">${d.p.toFixed(1)}%</span>
       <span class="pie-n">(${d.v.toLocaleString('es-CL')})</span>
     </div>`).join('')}</div>
-  </div>`;
-})();
-
-// ═══ WAFFLE CHART: Hospitales AC ═══
-(function(){
-  const el=document.getElementById('chartWaffle');if(!el)return;
-  const counts={};
-  hospitales.forEach(h=>{counts[h.r]=(counts[h.r]||0)+1;});
-  const sorted=Object.entries(counts).sort((a,b)=>b[1]-a[1]);
-
-  const colors={
-    'Metropolitana':'#8A2B36','Valparaíso':'#C9A96E','Maule':'#7CB5A0',
-    'Biobío':'#9B8EC4','Antofagasta':'#E8A87C','Coquimbo':'#E8A87C',
-    'La Araucanía':'#E8A87C','Los Lagos':'#E8A87C',
-    'Ñuble':'#5EADB0',"O'Higgins":'#5EADB0','Magallanes':'#5EADB0'
-  };
-  const def='#d4d4d4';
-
-  let cells=[];
-  sorted.forEach(([r,c])=>{for(let i=0;i<c;i++)cells.push({r,c:colors[r]||def});});
-
-  // group legend
-  const g3=sorted.filter(([,c])=>c===3).map(([r])=>r);
-  const g2=sorted.filter(([,c])=>c===2).map(([r])=>r);
-  const g1=sorted.filter(([,c])=>c===1).map(([r])=>r);
-  const big=sorted.filter(([,c])=>c>=5);
-
-  let leg=big.map(([r,c])=>`<span><span class="waffle-leg-dot" style="background:${colors[r]}"></span>${r} (${c})</span>`).join('');
-  if(g3.length)leg+=`<span><span class="waffle-leg-dot" style="background:#E8A87C"></span>3 hosp. (${g3.length} reg.)</span>`;
-  if(g2.length)leg+=`<span><span class="waffle-leg-dot" style="background:#5EADB0"></span>2 hosp. (${g2.length} reg.)</span>`;
-  if(g1.length)leg+=`<span><span class="waffle-leg-dot" style="background:${def}"></span>1 hosp. (${g1.length} reg.)</span>`;
-
-  el.innerHTML=`<div class="waffle-wrap">
-    <div class="waffle-grid">${cells.map(c=>`<div class="waffle-cell" title="${c.r}" style="background:${c.c}"></div>`).join('')}</div>
-    <div class="waffle-leg">${leg}</div>
-    <p class="waffle-note">Cada cuadrado = 1 hospital de alta complejidad</p>
   </div>`;
 })();
 </script>
