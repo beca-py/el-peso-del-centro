@@ -95,9 +95,14 @@
     .chart-card{
       background:white;border-radius:12px;overflow:hidden;
       box-shadow:0 4px 20px rgba(0,0,0,.15);transition:transform .3s;
+      display:flex;flex-direction:column;
     }
     .chart-card:hover{transform:translateY(-4px)}
-    .chart-card img{width:100%;height:auto;display:block}
+    .chart-img-wrap{
+      padding:1.2rem 1.2rem .8rem;background:#f9f9fb;
+      display:flex;align-items:center;justify-content:center;flex:1;
+    }
+    .chart-card img{width:100%;height:auto;display:block;border-radius:4px}
     .chart-card-caption{
       padding:.8rem 1.2rem;background:white;
       font-size:.78rem;color:var(--text-light);line-height:1.5;
@@ -408,19 +413,19 @@
     <p class="sec-desc">Resultados clave del estudio de establecimientos y especialistas a nivel regional.</p>
     <div class="charts-grid">
       <div class="chart-card">
-        <img src="img/grafico-tasa-100k.jpeg" alt="Tasa de centros de alta complejidad por cada 100k habitantes" loading="lazy">
+        <div class="chart-img-wrap"><img src="img/grafico-tasa-100k.jpeg" alt="Tasa de centros de alta complejidad por cada 100k habitantes" loading="lazy"></div>
         <div class="chart-card-caption"><strong>Tasa per cápita.</strong> Magallanes lidera con 1,20 centros por 100k hab. La RM (0,49) queda al centro de la tabla nacional.</div>
       </div>
       <div class="chart-card">
-        <img src="img/grafico-complejidad.jpeg" alt="Distribución de establecimientos por nivel de complejidad" loading="lazy">
+        <div class="chart-img-wrap"><img src="img/grafico-complejidad.jpeg" alt="Distribución de establecimientos por nivel de complejidad" loading="lazy"></div>
         <div class="chart-card-caption"><strong>Nivel de complejidad.</strong> 9 de cada 10 establecimientos son de baja o mediana complejidad. Solo el 2,4% alcanza la alta complejidad.</div>
       </div>
       <div class="chart-card">
-        <img src="img/grafico-rm-lidera.jpeg" alt="La Región Metropolitana lidera la red asistencial en alta complejidad" loading="lazy">
+        <div class="chart-img-wrap"><img src="img/grafico-rm-lidera.jpeg" alt="La Región Metropolitana lidera la red asistencial en alta complejidad" loading="lazy"></div>
         <div class="chart-card-caption"><strong>Concentración en la RM.</strong> La Región Metropolitana concentra casi el 6% de establecimientos de alta complejidad, liderando la red asistencial.</div>
       </div>
       <div class="chart-card">
-        <img src="img/grafico-especialidades.jpeg" alt="Medicina Interna domina la dotación de especialistas por región" loading="lazy">
+        <div class="chart-img-wrap"><img src="img/grafico-especialidades.jpeg" alt="Medicina Interna domina la dotación de especialistas por región" loading="lazy"></div>
         <div class="chart-card-caption"><strong>Especialidad dominante.</strong> Medicina Interna lidera en casi todas las regiones, con más de 3.100 profesionales solo en la RM.</div>
       </div>
     </div>
