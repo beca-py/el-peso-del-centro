@@ -95,8 +95,37 @@
     .map-layout{display:grid;grid-template-columns:380px 1fr;height:75vh;min-height:550px;max-height:800px;margin-top:2rem}
     .map-sidebar{background:#111827;display:flex;flex-direction:column;overflow:hidden;border-right:1px solid rgba(255,255,255,.06)}
 
+    /* region filter */
+    .region-filter{padding:.6rem 1.2rem;border-bottom:1px solid rgba(255,255,255,.06);display:flex;align-items:center;gap:.5rem}
+    .region-filter select{
+      flex:1;padding:.45rem .6rem;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);
+      border-radius:6px;color:white;font-size:.78rem;font-family:'Inter',sans-serif;outline:none;cursor:pointer;
+      appearance:none;-webkit-appearance:none;
+      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='rgba(255,255,255,.4)' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10z'/%3E%3C/svg%3E");
+      background-repeat:no-repeat;background-position:right .6rem center;padding-right:1.8rem;
+    }
+    .region-filter select:focus{border-color:var(--gold)}
+    .region-filter select option{background:#1a1a2e;color:white}
+    .region-filter label{font-size:.65rem;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.06em;white-space:nowrap}
+
+    /* regional analysis panel */
+    .region-panel{display:none;padding:1rem 1.2rem;border-bottom:1px solid rgba(255,255,255,.06);background:rgba(201,169,110,.05)}
+    .region-panel.visible{display:block}
+    .region-panel-title{font-family:'DM Serif Display',serif;font-size:.95rem;color:var(--gold);margin-bottom:.6rem}
+    .region-panel-stats{display:grid;grid-template-columns:1fr 1fr;gap:.4rem;margin-bottom:.6rem}
+    .rstat{background:rgba(255,255,255,.04);border-radius:6px;padding:.4rem .6rem}
+    .rstat .rv{font-family:'DM Serif Display',serif;font-size:.95rem;color:white;line-height:1}
+    .rstat .rl{font-size:.58rem;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.04em}
+    .region-panel-specs{margin-top:.4rem}
+    .region-panel-specs h5{font-size:.62rem;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.35rem}
+    .spec-bar-row{display:flex;align-items:center;gap:.4rem;margin-bottom:.25rem}
+    .spec-bar-name{font-size:.68rem;color:rgba(255,255,255,.65);width:100px;text-align:right;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .spec-bar-track{flex:1;height:14px;background:rgba(255,255,255,.04);border-radius:3px;overflow:hidden}
+    .spec-bar-fill{height:100%;border-radius:3px;display:flex;align-items:center;padding-left:.3rem}
+    .spec-bar-fill span{font-size:.55rem;font-weight:700;color:white}
+
     /* search */
-    .search-wrap{padding:1rem 1.2rem;border-bottom:1px solid rgba(255,255,255,.06)}
+    .search-wrap{padding:.6rem 1.2rem;border-bottom:1px solid rgba(255,255,255,.06)}
     .search-box{position:relative}
     .search-box input{
       width:100%;padding:.7rem 1rem .7rem 2.4rem;
@@ -345,12 +374,19 @@
   <div class="map-layout">
     <!-- SIDEBAR -->
     <div class="map-sidebar">
+      <div class="region-filter">
+        <label for="regionSelect">Región</label>
+        <select id="regionSelect">
+          <option value="">Todas las regiones</option>
+        </select>
+      </div>
+      <div class="region-panel" id="regionPanel"></div>
       <div class="search-wrap">
         <div class="search-box">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
           <input type="text" id="searchInput" placeholder="Buscar Hospital..." autocomplete="off">
         </div>
-        <div class="search-count" id="searchCount">80 Establecimientos de alta complejidad</div>
+        <div class="search-count" id="searchCount">80 establecimientos de alta complejidad</div>
       </div>
       <div class="hosp-list" id="hospList"></div>
     </div>
@@ -511,6 +547,29 @@ const hospitales = [
 // region order north to south
 const regionOrder = ["Arica y Parinacota","Tarapacá","Antofagasta","Atacama","Coquimbo","Valparaíso","Metropolitana","O'Higgins","Maule","Ñuble","Biobío","La Araucanía","Los Ríos","Los Lagos","Aysén","Magallanes"];
 
+// ═══ REGIONAL DATA (from Base.xlsx + establecimientos CSV) ═══
+const regionData = {
+"Arica y Parinacota":{"esp":376,"pop":252110,"tasa":149.1,"top":[["Medicina Interna",37],["Pediatría",36],["Cirugía General",31],["Anestesiología",30],["Psiquiatría Adulto",22]]},
+"Tarapacá":{"esp":219,"pop":330558,"tasa":66.3,"top":[["Pediatría",28],["Medicina Interna",28],["Psiquiatría Adulto",16],["Traumatología y Ortopedia",13],["Imagenología",11]]},
+"Antofagasta":{"esp":1232,"pop":607534,"tasa":202.8,"top":[["Pediatría",133],["Medicina Interna",127],["Cirugía General",115],["Obstetricia y Ginecología",103],["Traumatología y Ortopedia",76]]},
+"Atacama":{"esp":440,"pop":286168,"tasa":153.8,"top":[["Medicina Interna",54],["Pediatría",46],["Obstetricia y Ginecología",44],["Cirugía General",41],["Traumatología y Ortopedia",31]]},
+"Coquimbo":{"esp":1220,"pop":757586,"tasa":161.0,"top":[["Medicina Interna",166],["Pediatría",135],["Cirugía General",99],["Obstetricia y Ginecología",97],["Psiquiatría Adulto",69]]},
+"Valparaíso":{"esp":4018,"pop":1815902,"tasa":221.3,"top":[["Medicina Interna",585],["Pediatría",467],["Cirugía General",297],["Anestesiología",250],["Obstetricia y Ginecología",247]]},
+"Metropolitana":{"esp":27728,"pop":7112808,"tasa":389.8,"top":[["Medicina Interna",3139],["Pediatría",2693],["Obstetricia y Ginecología",1997],["Cirugía General",1970],["Traumatología y Ortopedia",1576]]},
+"O'Higgins":{"esp":2820,"pop":914555,"tasa":308.3,"top":[["Medicina Interna",463],["Cirugía General",309],["Pediatría",190],["Traumatología y Ortopedia",181],["Cardiología",161]]},
+"Maule":{"esp":1766,"pop":1044950,"tasa":169.0,"top":[["Medicina Interna",232],["Pediatría",191],["Cirugía General",173],["Obstetricia y Ginecología",144],["Medicina Familiar",113]]},
+"Ñuble":{"esp":1253,"pop":480609,"tasa":260.7,"top":[["Medicina Interna",128],["Pediatría",117],["Cirugía General",98],["Traumatología y Ortopedia",93],["Anestesiología",93]]},
+"Biobío":{"esp":4178,"pop":1556805,"tasa":268.4,"top":[["Medicina Interna",427],["Pediatría",406],["Cirugía General",303],["Imagenología",291],["Obstetricia y Ginecología",269]]},
+"La Araucanía":{"esp":1985,"pop":957224,"tasa":207.4,"top":[["Medicina Interna",253],["Pediatría",190],["Anestesiología",135],["Cirugía General",128],["Medicina Familiar",122]]},
+"Los Ríos":{"esp":900,"pop":384837,"tasa":233.9,"top":[["Medicina Interna",137],["Pediatría",101],["Cirugía General",56],["Anestesiología",50],["Medicina Familiar",49]]},
+"Los Lagos":{"esp":1933,"pop":828708,"tasa":233.3,"top":[["Medicina Interna",264],["Pediatría",214],["Cirugía General",129],["Anestesiología",125],["Obstetricia y Ginecología",124]]},
+"Aysén":{"esp":239,"pop":103158,"tasa":231.7,"top":[["Medicina Interna",19],["Traumatología y Ortopedia",18],["Anestesiología",17],["Pediatría",17],["Cirugía General",15]]},
+"Magallanes":{"esp":410,"pop":166533,"tasa":246.2,"top":[["Pediatría",49],["Medicina Interna",46],["Anestesiología",32],["Cirugía General",31],["Traumatología y Ortopedia",30]]}
+};
+
+// Founding dates (where available from DEIS)
+const fundacion = {"Centro Oncológico del Norte (CON)":"2018","Hospital Dr. Carlos Cisternas (Calama)":"2018","Hospital Dr. Leonardo Guzmán (Antofagasta)":"2017","Hospital San José del Carmen (Copiapó)":"2016","Hospital Dr. Antonio Tirado Lanas de Ovalle":"2000","Hospital San Juan de Dios (La Serena)":"2022","Hospital Biprovincial Quillota Petorca":"2022","Hospital Claudio Vicuña (San Antonio)":"1925","Hospital Dr. Gustavo Fricke (Viña del Mar)":"2000","Hospital Naval Almirante Neff":"2009","Complejo Hospitalario San José (Independencia)":"1980","Hospital Félix Bulnes Cerda":"2000","Hospital Carabineros":"2009","Hospital Clínico Metropolitano El Carmen (Maipú)":"2013","Hospital Clínico Metropolitano La Florida":"2013","Hospital Clínico Universidad de Chile":"2009","Hospital Dipreca Teniente Hernán Merino":"2009","Hospital Dr. Exequiel González Cortés (San Miguel)":"2017","Hospital FACH":"2009","Hospital Metropolitano (Ex Militar)":"2020","Hospital Militar de Santiago":"2009","Hospital Padre Alberto Hurtado (San Ramón)":"1998","Hospital de Urgencia Asistencia Pública Dr. Alejandro del Río":"2019","Hospital Dr. Franco Ravera Zunino":"2016","Hospital Clínico Regional Dr. Guillermo Grant Benavente (Concepción)":"2012","Hospital Las Higueras (Talcahuano)":"2022","Hospital San José de Coronel":"2011","Hospital de Lota":"2011","Hospital Dr. Hernán Henríquez Aravena (Temuco)":"1963","Hospital Dr. Mauricio Heyermann (Angol)":"2000","Hospital Base Valdivia":"1984","Hospital Base San José de Osorno":"2015","Hospital de Puerto Montt":"2014","Hospital Clínico de Magallanes Dr. Lautaro Navarro Avaria":"1983","Centro Metropolitano de Atención Prehospitalaria (SAMU)":"2016"};
+
 // ═══ MAP ═══
 const chileBounds = L.latLngBounds(L.latLng(-56,-76), L.latLng(-17.4,-66.4));
 
@@ -558,7 +617,10 @@ hospitales.forEach((h, i) => {
   const dirRow = h.dir ? `<div class="prow">${svgPin}<span>${h.dir}, ${h.c}</span></div>` : '';
   const telRow = h.tel ? `<div class="prow">${svgPhone}<span>${h.tel}</span></div>` : '';
   const ssRow = h.ss ? `<div class="prow">${svgHosp}<span>${h.ss}</span></div>` : '';
-  const details = (dirRow || telRow || ssRow) ? `<div class="pdetails">${dirRow}${telRow}${ssRow}</div>` : '';
+  const fundRow = fundacion[h.n] ? `<div class="prow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg><span>En funcionamiento desde ${fundacion[h.n]}</span></div>` : '';
+  const rd = regionData[h.r];
+  const espRow = rd ? `<div class="prow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4-4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg><span>${rd.esp.toLocaleString('es-CL')} especialistas en ${h.r} (${rd.tasa}/100k hab.)</span></div>` : '';
+  const details = `<div class="pdetails">${dirRow}${telRow}${ssRow}${fundRow}${espRow}</div>`;
   const popup = `<div class="popup-inner"><h4>${h.n}</h4><p class="pmeta">${h.t} &mdash; ${h.r}, ${h.c}</p>${details}<div class="ptags"><span class="ptag ptag-alta">Alta Complejidad</span>${urgTag}${nivTag}</div></div>`;
   const marker = L.marker([h.la, h.lo], { icon: makeIcon(false) })
     .addTo(map)
@@ -585,13 +647,15 @@ function selectHospital(idx) {
 }
 
 // ═══ SIDEBAR LIST ═══
-function buildList(filter) {
+function buildList(filter, regionFilter) {
   const list = document.getElementById('hospList');
   list.innerHTML = '';
   const q = (filter || '').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  const rf = regionFilter || '';
   let count = 0;
 
   regionOrder.forEach(region => {
+    if (rf && region !== rf) return;
     const items = hospitales
       .map((h, i) => ({ ...h, idx: i }))
       .filter(h => h.r === region)
@@ -631,14 +695,73 @@ function buildList(filter) {
   document.getElementById('searchCount').textContent = `${count} establecimiento${count !== 1 ? 's' : ''} encontrado${count !== 1 ? 's' : ''}`;
 }
 
-buildList('');
+buildList('', '');
+
+// ═══ REGION FILTER ═══
+const regionSelect = document.getElementById('regionSelect');
+const regionPanel = document.getElementById('regionPanel');
+
+// Populate region select
+regionOrder.forEach(r => {
+  const opt = document.createElement('option');
+  opt.value = r;
+  opt.textContent = r;
+  regionSelect.appendChild(opt);
+});
+
+function showRegionPanel(region) {
+  if (!region) {
+    regionPanel.classList.remove('visible');
+    regionPanel.innerHTML = '';
+    return;
+  }
+  const rd = regionData[region];
+  if (!rd) { regionPanel.classList.remove('visible'); return; }
+
+  const hospCount = hospitales.filter(h => h.r === region).length;
+  const maxTop = rd.top[0][1];
+
+  regionPanel.innerHTML = `
+    <div class="region-panel-title">${region}</div>
+    <div class="region-panel-stats">
+      <div class="rstat"><span class="rv">${rd.esp.toLocaleString('es-CL')}</span><span class="rl">Especialistas</span></div>
+      <div class="rstat"><span class="rv">${rd.tasa}</span><span class="rl">Por 100k hab.</span></div>
+      <div class="rstat"><span class="rv">${(rd.pop/1000).toFixed(0)}k</span><span class="rl">Población</span></div>
+      <div class="rstat"><span class="rv">${hospCount}</span><span class="rl">Hospitales AC</span></div>
+    </div>
+    <div class="region-panel-specs">
+      <h5>Top especialidades</h5>
+      ${rd.top.map(([name, count]) => {
+        const pct = Math.max((count / maxTop) * 100, 8);
+        return `<div class="spec-bar-row"><span class="spec-bar-name">${name}</span><div class="spec-bar-track"><div class="spec-bar-fill" style="width:${pct}%;background:var(--rose-dark)"><span>${count}</span></div></div></div>`;
+      }).join('')}
+    </div>`;
+  regionPanel.classList.add('visible');
+}
+
+regionSelect.addEventListener('change', () => {
+  const region = regionSelect.value;
+  showRegionPanel(region);
+  buildList(searchInput.value, region);
+
+  // Zoom to region hospitals
+  if (region) {
+    const rh = hospitales.filter(h => h.r === region);
+    if (rh.length > 0) {
+      const bounds = L.latLngBounds(rh.map(h => [h.la, h.lo]));
+      map.flyToBounds(bounds.pad(0.3), { duration: 1 });
+    }
+  } else {
+    map.flyToBounds(L.latLngBounds(L.latLng(-55.5,-75.5), L.latLng(-17.5,-66.5)), { duration: 1 });
+  }
+});
 
 // ═══ SEARCH ═══
 const searchInput = document.getElementById('searchInput');
 let debounce;
 searchInput.addEventListener('input', () => {
   clearTimeout(debounce);
-  debounce = setTimeout(() => buildList(searchInput.value), 150);
+  debounce = setTimeout(() => buildList(searchInput.value, regionSelect.value), 150);
 });
 
 // ═══ FULLSCREEN TOGGLE ═══
