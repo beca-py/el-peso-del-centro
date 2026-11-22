@@ -7,256 +7,205 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Space+Mono:wght@400;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
-    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-    :root {
-      --dark: #1a1a2e;
-      --dark2: #16213e;
-      --rose: #C4878C;
-      --rose-dark: #8A2B36;
-      --rose-light: #F5E6E8;
-      --cream: #FAF6F2;
-      --text: #2c2c2c;
-      --text-light: #6b6b6b;
-      --gold: #C9A96E;
+    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+    :root{
+      --dark:#1a1a2e;--dark2:#16213e;--rose:#C4878C;--rose-dark:#8A2B36;
+      --rose-light:#F5E6E8;--cream:#FAF6F2;--text:#2c2c2c;--text-light:#6b6b6b;--gold:#C9A96E;
     }
-    html { scroll-behavior: smooth; }
-    body { font-family: 'Inter', sans-serif; color: var(--text); background: var(--cream); overflow-x: hidden; }
+    html{scroll-behavior:smooth}
+    body{font-family:'Inter',sans-serif;color:var(--text);background:var(--cream);overflow-x:hidden}
 
-    /* ─── NAV ─── */
-    nav {
-      position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
-      background: rgba(26,26,46,0.97); backdrop-filter: blur(16px);
-      height: 56px; display: flex; align-items: center; justify-content: space-between;
-      padding: 0 2.5rem;
-      border-bottom: 1px solid rgba(201,169,110,0.15);
+    /* ── NAV ── */
+    nav{
+      position:fixed;top:0;left:0;right:0;z-index:1000;
+      background:rgba(26,26,46,.97);backdrop-filter:blur(16px);
+      height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 2.5rem;
+      border-bottom:1px solid rgba(201,169,110,.15);
     }
-    .nav-brand { font-family: 'DM Serif Display', serif; color: var(--gold); font-size: 1rem; letter-spacing: .04em; }
-    .nav-links { display: flex; gap: 1.8rem; list-style: none; }
-    .nav-links a { color: rgba(255,255,255,.65); text-decoration: none; font-size: .8rem; font-weight: 500; letter-spacing: .03em; transition: color .3s; }
-    .nav-links a:hover, .nav-links a.active { color: var(--gold); }
-    .nav-toggle { display: none; background: none; border: none; color: white; font-size: 1.4rem; cursor: pointer; }
+    .nav-brand{font-family:'DM Serif Display',serif;color:var(--gold);font-size:1rem;letter-spacing:.04em}
+    .nav-links{display:flex;gap:1.8rem;list-style:none}
+    .nav-links a{color:rgba(255,255,255,.65);text-decoration:none;font-size:.8rem;font-weight:500;letter-spacing:.03em;transition:color .3s}
+    .nav-links a:hover,.nav-links a.active{color:var(--gold)}
+    .nav-toggle{display:none;background:none;border:none;color:white;font-size:1.4rem;cursor:pointer}
 
-    /* ─── HERO ─── */
-    .hero {
-      min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center;
-      text-align: center; padding: 5rem 2rem 4rem; position: relative; overflow: hidden;
-      background: linear-gradient(175deg, #111 0%, #1a1a2e 40%, #0f3460 100%);
+    /* ── HERO ── */
+    .hero{
+      min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;
+      text-align:center;padding:5rem 2rem 4rem;position:relative;overflow:hidden;
+      background:linear-gradient(175deg,#111 0%,#1a1a2e 40%,#0f3460 100%);
     }
-    .hero::before {
-      content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
-      background: linear-gradient(180deg, rgba(0,0,0,.5) 0%, rgba(0,0,0,.2) 50%, rgba(26,26,46,.8) 100%);
-      z-index: 1;
-    }
-    .hero-bg {
-      position: absolute; top: 0; left: 0; right: 0; bottom: 0;
-      background: repeating-linear-gradient(
-        90deg, transparent, transparent 60px, rgba(201,169,110,.03) 60px, rgba(201,169,110,.03) 61px
-      ), repeating-linear-gradient(
-        0deg, transparent, transparent 60px, rgba(201,169,110,.03) 60px, rgba(201,169,110,.03) 61px
-      );
-    }
-    .hero-content { position: relative; z-index: 2; max-width: 750px; }
-    .hero h1 {
-      font-family: 'DM Serif Display', serif;
-      font-size: clamp(2.8rem, 7vw, 5rem);
-      color: white; line-height: 1.05; margin-bottom: 1.5rem;
-      text-transform: uppercase; letter-spacing: .02em;
-    }
-    .hero h1 span { display: block; color: var(--gold); font-size: .55em; text-transform: none; letter-spacing: .01em; margin-top: .3em; }
-    .hero p { font-size: 1.1rem; color: rgba(255,255,255,.55); line-height: 1.7; max-width: 550px; margin: 0 auto 2.5rem; }
-    .hero-line { width: 60px; height: 3px; background: var(--gold); margin: 0 auto 2rem; }
-    .hero-cta {
-      display: inline-flex; align-items: center; gap: .6rem;
-      padding: .9rem 2rem; border: 1px solid var(--gold); color: var(--gold);
-      text-decoration: none; font-size: .85rem; font-weight: 600; letter-spacing: .05em;
-      border-radius: 4px; transition: all .3s;
-    }
-    .hero-cta:hover { background: var(--gold); color: var(--dark); }
+    .hero::before{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.5),rgba(0,0,0,.2) 50%,rgba(26,26,46,.8));z-index:1}
+    .hero-bg{position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent,transparent 60px,rgba(201,169,110,.03) 60px,rgba(201,169,110,.03) 61px),repeating-linear-gradient(0deg,transparent,transparent 60px,rgba(201,169,110,.03) 60px,rgba(201,169,110,.03) 61px)}
+    .hero-content{position:relative;z-index:2;max-width:750px}
+    .hero-line{width:60px;height:3px;background:var(--gold);margin:0 auto 2rem}
+    .hero h1{font-family:'DM Serif Display',serif;font-size:clamp(2.8rem,7vw,5rem);color:white;line-height:1.05;margin-bottom:1.5rem;text-transform:uppercase;letter-spacing:.02em}
+    .hero h1 span{display:block;color:var(--gold);font-size:.55em;text-transform:none;letter-spacing:.01em;margin-top:.3em}
+    .hero p{font-size:1.1rem;color:rgba(255,255,255,.55);line-height:1.7;max-width:550px;margin:0 auto 2.5rem}
+    .hero-cta{display:inline-flex;align-items:center;gap:.6rem;padding:.9rem 2rem;border:1px solid var(--gold);color:var(--gold);text-decoration:none;font-size:.85rem;font-weight:600;letter-spacing:.05em;border-radius:4px;transition:all .3s}
+    .hero-cta:hover{background:var(--gold);color:var(--dark)}
 
-    /* ─── SECTION HELPERS ─── */
-    .sec { padding: 5rem 2rem; max-width: 1100px; margin: 0 auto; }
-    .sec-full { padding: 5rem 2rem; }
-    .sec-full-inner { max-width: 1100px; margin: 0 auto; }
-    .sec-label { font-size: .7rem; font-weight: 700; letter-spacing: .18em; color: var(--rose-dark); text-transform: uppercase; margin-bottom: .6rem; }
-    .sec-title { font-family: 'DM Serif Display', serif; font-size: clamp(1.6rem, 3.5vw, 2.5rem); line-height: 1.2; margin-bottom: 1rem; }
-    .sec-desc { font-size: .95rem; color: var(--text-light); line-height: 1.7; max-width: 650px; }
+    /* ── SECTION BASE ── */
+    .sec-full{padding:5rem 2rem}
+    .sec-inner{max-width:1200px;margin:0 auto}
+    .sec-label{font-size:.7rem;font-weight:700;letter-spacing:.18em;color:var(--rose-dark);text-transform:uppercase;margin-bottom:.6rem}
+    .sec-title{font-family:'DM Serif Display',serif;font-size:clamp(1.6rem,3.5vw,2.5rem);line-height:1.2;margin-bottom:1rem}
+    .sec-desc{font-size:.95rem;color:var(--text-light);line-height:1.7;max-width:650px}
 
-    /* ─── CAROUSEL ─── */
-    .carousel-sec { background: var(--dark); }
-    .carousel-sec .sec-label { color: var(--gold); }
-    .carousel-sec .sec-title { color: white; }
-    .carousel-sec .sec-desc { color: rgba(255,255,255,.5); }
-    .carousel-wrap { position: relative; margin-top: 2rem; }
-    .carousel {
-      display: flex; gap: 1.5rem; overflow-x: auto; scroll-snap-type: x mandatory;
-      padding: 1rem 0 1.5rem; -ms-overflow-style: none; scrollbar-width: none;
-    }
-    .carousel::-webkit-scrollbar { display: none; }
-    .slide {
-      min-width: 340px; max-width: 340px; scroll-snap-align: start; flex-shrink: 0;
-      border-radius: 12px; overflow: hidden; position: relative;
-    }
-    .slide-dark {
-      background: #2c2c2c; color: white; padding: 2.5rem 2rem;
-      display: flex; flex-direction: column; justify-content: space-between; min-height: 380px;
-    }
-    .slide-light {
-      background: var(--rose-light); color: var(--text); padding: 2.5rem 2rem;
-      min-height: 380px;
-    }
-    .slide-rose {
-      background: var(--rose); color: white; padding: 2.5rem 2rem;
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      text-align: center; min-height: 380px;
-    }
-    .slide h3 {
-      font-family: 'Space Mono', monospace; font-size: 1.05rem; line-height: 1.5;
-      margin-bottom: 1rem;
-    }
-    .slide .big {
-      font-family: 'DM Serif Display', serif; font-size: 3.5rem; color: var(--rose-dark);
-      display: block; margin-bottom: .4rem;
-    }
-    .slide-dark .big { color: var(--gold); }
-    .slide-rose .big { color: white; font-size: 3rem; }
-    .slide .caption { font-size: .75rem; color: rgba(255,255,255,.45); margin-top: auto; }
-    .slide-light .caption { color: var(--text-light); }
-    /* mini bar chart inside slides */
-    .mini-bars { display: flex; flex-direction: column; gap: .45rem; margin-top: 1rem; }
-    .mini-bar-row { display: flex; align-items: center; gap: .5rem; }
-    .mini-bar-label { font-size: .72rem; width: 110px; text-align: right; flex-shrink: 0; }
-    .mini-bar-track { flex: 1; height: 20px; background: rgba(255,255,255,.08); border-radius: 4px; overflow: hidden; }
-    .slide-light .mini-bar-track { background: rgba(0,0,0,.06); }
-    .mini-bar-fill { height: 100%; border-radius: 4px; display: flex; align-items: center; padding-left: .4rem; }
-    .mini-bar-fill span { font-size: .65rem; font-weight: 700; color: white; }
-    .carousel-nav { display: flex; justify-content: center; gap: .5rem; margin-top: .5rem; }
-    .carousel-dot {
-      width: 10px; height: 10px; border-radius: 50%; background: rgba(255,255,255,.2);
-      border: none; cursor: pointer; transition: background .3s;
-    }
-    .carousel-dot.active { background: var(--gold); }
+    /* ── CAROUSEL ── */
+    .carousel-sec{background:var(--dark)}
+    .carousel-sec .sec-label{color:var(--gold)}
+    .carousel-sec .sec-title{color:white}
+    .carousel{display:flex;gap:1.5rem;overflow-x:auto;scroll-snap-type:x mandatory;padding:1rem 0 1.5rem;-ms-overflow-style:none;scrollbar-width:none}
+    .carousel::-webkit-scrollbar{display:none}
+    .slide{min-width:340px;max-width:340px;scroll-snap-align:start;flex-shrink:0;border-radius:12px;overflow:hidden}
+    .slide-dark{background:#2c2c2c;color:white;padding:2.5rem 2rem;display:flex;flex-direction:column;justify-content:space-between;min-height:380px}
+    .slide-light{background:var(--rose-light);color:var(--text);padding:2.5rem 2rem;min-height:380px}
+    .slide-rose{background:var(--rose);color:white;padding:2.5rem 2rem;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;min-height:380px}
+    .slide h3{font-family:'Space Mono',monospace;font-size:1.05rem;line-height:1.5;margin-bottom:1rem}
+    .slide .big{font-family:'DM Serif Display',serif;font-size:3.5rem;display:block;margin-bottom:.4rem}
+    .slide-dark .big{color:var(--gold)}
+    .slide-light .big{color:var(--rose-dark)}
+    .slide-rose .big{color:white;font-size:3rem}
+    .slide .caption{font-size:.75rem;color:rgba(255,255,255,.45);margin-top:auto}
+    .slide-light .caption{color:var(--text-light)}
+    .mini-bars{display:flex;flex-direction:column;gap:.45rem;margin-top:1rem}
+    .mini-bar-row{display:flex;align-items:center;gap:.5rem}
+    .mini-bar-label{font-size:.72rem;width:110px;text-align:right;flex-shrink:0}
+    .mini-bar-track{flex:1;height:20px;border-radius:4px;overflow:hidden}
+    .slide-light .mini-bar-track{background:rgba(0,0,0,.06)}
+    .mini-bar-fill{height:100%;border-radius:4px;display:flex;align-items:center;padding-left:.4rem}
+    .mini-bar-fill span{font-size:.65rem;font-weight:700;color:white}
+    .carousel-nav{display:flex;justify-content:center;gap:.5rem;margin-top:.5rem}
+    .carousel-dot{width:10px;height:10px;border-radius:50%;background:rgba(255,255,255,.2);border:none;cursor:pointer;transition:background .3s}
+    .carousel-dot.active{background:var(--gold)}
 
-    /* ─── FINDINGS TEXT ─── */
-    .findings-sec { background: white; }
-    .findings-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-top: 2rem; }
-    .finding-block { padding: 1.5rem; border-left: 3px solid var(--rose-dark); }
-    .finding-block h3 { font-family: 'DM Serif Display', serif; font-size: 1.15rem; margin-bottom: .5rem; }
-    .finding-block p { font-size: .88rem; color: var(--text-light); line-height: 1.65; }
+    /* ── FINDINGS ── */
+    .findings-sec{background:white}
+    .findings-grid{display:grid;grid-template-columns:1fr 1fr;gap:2rem;margin-top:2rem}
+    .finding-block{padding:1.5rem;border-left:3px solid var(--rose-dark)}
+    .finding-block h3{font-family:'DM Serif Display',serif;font-size:1.15rem;margin-bottom:.5rem}
+    .finding-block p{font-size:.88rem;color:var(--text-light);line-height:1.65}
 
-    /* ─── MAP + CONTENT SECTION ─── */
-    .map-content-sec { background: var(--cream); }
-    .map-content-grid {
-      display: grid; grid-template-columns: 1fr 480px; gap: 2.5rem;
-      margin-top: 2rem; align-items: start;
-    }
-    .map-text h3 { font-family: 'DM Serif Display', serif; font-size: 1.5rem; margin-bottom: 1rem; }
-    .map-text p { font-size: .92rem; color: var(--text-light); line-height: 1.7; margin-bottom: 1rem; }
-    .map-text .stat-row {
-      display: flex; gap: 1rem; margin: 1.5rem 0; flex-wrap: wrap;
-    }
-    .map-text .stat-item {
-      background: white; border-radius: 10px; padding: 1rem 1.2rem; flex: 1; min-width: 120px;
-      box-shadow: 0 2px 10px rgba(0,0,0,.04);
-    }
-    .map-text .stat-val {
-      font-family: 'DM Serif Display', serif; font-size: 1.8rem; color: var(--rose-dark); display: block;
-    }
-    .map-text .stat-lbl { font-size: .7rem; text-transform: uppercase; letter-spacing: .08em; color: var(--text-light); font-weight: 600; }
-    #mapGeo {
-      height: 540px; border-radius: 14px;
-      box-shadow: 0 4px 25px rgba(0,0,0,.12); border: 2px solid white;
-    }
-    .map-legend-box {
-      background: white; border-radius: 10px; padding: 1rem 1.2rem;
-      margin-top: 1rem; box-shadow: 0 2px 10px rgba(0,0,0,.04);
-      display: flex; gap: 1.5rem; flex-wrap: wrap; align-items: center;
-    }
-    .legend-item { display: flex; align-items: center; gap: .4rem; font-size: .78rem; color: var(--text-light); }
-    .legend-dot { width: 14px; height: 14px; border-radius: 50%; border: 2px solid white; box-shadow: 0 1px 3px rgba(0,0,0,.2); }
+    /* ── MAP SECTION (PROTAGONIST) ── */
+    .map-hero{background:var(--dark);padding:0;position:relative}
+    .map-hero-header{text-align:center;padding:3.5rem 2rem 0}
+    .map-hero-header .sec-label{color:var(--gold)}
+    .map-hero-header .sec-title{color:white;font-size:clamp(1.8rem,4vw,2.8rem);max-width:700px;margin:0 auto 0.5rem}
+    .map-hero-header .sec-desc{color:rgba(255,255,255,.5);max-width:600px;margin:0 auto}
+    .map-layout{display:grid;grid-template-columns:380px 1fr;height:75vh;min-height:550px;max-height:800px;margin-top:2rem}
+    .map-sidebar{background:#111827;display:flex;flex-direction:column;overflow:hidden;border-right:1px solid rgba(255,255,255,.06)}
 
-    /* ─── IMPLICATIONS ─── */
-    .impl-sec { background: var(--rose-light); }
-    .impl-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px,1fr)); gap: 1.5rem; margin-top: 2rem; }
-    .impl-card {
-      background: white; border-radius: 12px; padding: 1.8rem;
-      box-shadow: 0 2px 12px rgba(0,0,0,.04); border-top: 3px solid var(--rose-dark);
+    /* search */
+    .search-wrap{padding:1rem 1.2rem;border-bottom:1px solid rgba(255,255,255,.06)}
+    .search-box{position:relative}
+    .search-box input{
+      width:100%;padding:.7rem 1rem .7rem 2.4rem;
+      background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);
+      border-radius:8px;color:white;font-size:.85rem;font-family:'Inter',sans-serif;
+      outline:none;transition:border-color .3s;
     }
-    .impl-card h4 { font-family: 'DM Serif Display', serif; font-size: 1.05rem; margin-bottom: .5rem; }
-    .impl-card p { font-size: .85rem; color: var(--text-light); line-height: 1.6; }
+    .search-box input::placeholder{color:rgba(255,255,255,.3)}
+    .search-box input:focus{border-color:var(--gold)}
+    .search-box svg{position:absolute;left:.8rem;top:50%;transform:translateY(-50%);width:16px;height:16px;color:rgba(255,255,255,.3)}
+    .search-count{font-size:.7rem;color:rgba(255,255,255,.3);margin-top:.5rem;text-align:right}
 
-    /* ─── TEAM ─── */
-    .team-sec { background: white; }
-    .team-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2.5rem; margin-top: 2rem; align-items: start; }
-    .team-members { display: flex; flex-direction: column; gap: .6rem; }
-    .team-member {
-      display: flex; align-items: center; gap: .8rem; padding: .8rem 1rem;
-      background: var(--cream); border-radius: 8px;
+    /* hospital list */
+    .hosp-list{flex:1;overflow-y:auto;padding:.5rem 0}
+    .hosp-list::-webkit-scrollbar{width:4px}
+    .hosp-list::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);border-radius:4px}
+    .region-group-title{
+      font-size:.65rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;
+      color:var(--gold);padding:.8rem 1.2rem .3rem;position:sticky;top:0;background:#111827;z-index:1;
     }
-    .team-avatar {
-      width: 36px; height: 36px; border-radius: 50%; background: var(--rose-dark);
-      display: flex; align-items: center; justify-content: center;
-      color: white; font-weight: 700; font-size: .8rem; flex-shrink: 0;
+    .hosp-item{
+      padding:.6rem 1.2rem;cursor:pointer;transition:background .2s;
+      display:flex;align-items:flex-start;gap:.6rem;border-left:3px solid transparent;
     }
-    .team-name { font-size: .9rem; font-weight: 500; }
-    .source-box {
-      background: var(--cream); border-radius: 10px; padding: 1.5rem;
-      border-left: 4px solid var(--gold);
-    }
-    .source-box h4 { font-size: .85rem; font-weight: 700; margin-bottom: .5rem; }
-    .source-box p { font-size: .82rem; color: var(--text-light); line-height: 1.6; }
+    .hosp-item:hover{background:rgba(255,255,255,.04);border-left-color:var(--rose)}
+    .hosp-item.active{background:rgba(196,135,140,.12);border-left-color:var(--gold)}
+    .hosp-dot{width:10px;height:10px;border-radius:50%;background:var(--rose-dark);flex-shrink:0;margin-top:4px;border:2px solid rgba(255,255,255,.2)}
+    .hosp-info{flex:1;min-width:0}
+    .hosp-name{font-size:.8rem;color:rgba(255,255,255,.85);line-height:1.3;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .hosp-meta{font-size:.68rem;color:rgba(255,255,255,.35);margin-top:2px}
+    .hosp-badges{display:flex;gap:.3rem;margin-top:3px}
+    .hosp-badge{font-size:.58rem;padding:1px 6px;border-radius:3px;font-weight:600}
+    .hosp-badge-urg{background:rgba(46,125,50,.2);color:#66BB6A}
+    .hosp-badge-no-urg{background:rgba(255,255,255,.05);color:rgba(255,255,255,.25)}
 
-    /* ─── FOOTER ─── */
-    footer {
-      background: var(--dark); padding: 2.5rem 2rem; text-align: center;
+    /* map */
+    .map-container-wrap{position:relative}
+    #mapGeo{height:100%;width:100%}
+    .map-stats-overlay{
+      position:absolute;top:1rem;left:1rem;z-index:500;
+      display:flex;gap:.6rem;
     }
-    footer p { color: rgba(255,255,255,.35); font-size: .8rem; }
-    footer .fb { font-family: 'DM Serif Display', serif; color: var(--gold); font-size: 1rem; margin-bottom: .3rem; }
+    .map-stat-pill{
+      background:rgba(26,26,46,.88);backdrop-filter:blur(8px);
+      padding:.45rem .9rem;border-radius:8px;border:1px solid rgba(201,169,110,.15);
+    }
+    .map-stat-pill .val{font-family:'DM Serif Display',serif;font-size:1.1rem;color:var(--gold);display:block;line-height:1}
+    .map-stat-pill .lbl{font-size:.6rem;color:rgba(255,255,255,.45);text-transform:uppercase;letter-spacing:.06em}
 
-    /* ─── POPUP ─── */
-    .hosp-popup { font-family: 'Inter', sans-serif; }
-    .hosp-popup h4 { font-size: .85rem; color: var(--dark); margin-bottom: .3rem; line-height: 1.3; }
-    .hosp-popup .meta { font-size: .75rem; color: var(--text-light); line-height: 1.5; }
-    .hosp-popup .tag {
-      display: inline-block; padding: 2px 8px; border-radius: 4px;
-      font-size: .65rem; font-weight: 700; margin-top: .3rem;
-    }
-    .hosp-popup .tag-alta { background: var(--rose-dark); color: white; }
-    .hosp-popup .tag-urg { background: #E8F5E9; color: #2E7D32; }
+    /* popups */
+    .leaflet-popup-content-wrapper{border-radius:12px;box-shadow:0 8px 30px rgba(0,0,0,.25);border:1px solid rgba(0,0,0,.05)}
+    .leaflet-popup-content{margin:.8rem 1rem;font-family:'Inter',sans-serif}
+    .popup-inner h4{font-size:.9rem;color:var(--dark);margin-bottom:.25rem;line-height:1.3;font-weight:600}
+    .popup-inner .pmeta{font-size:.78rem;color:var(--text-light);margin-bottom:.4rem}
+    .popup-inner .ptags{display:flex;gap:.3rem;flex-wrap:wrap}
+    .popup-inner .ptag{display:inline-block;padding:2px 8px;border-radius:4px;font-size:.65rem;font-weight:700}
+    .popup-inner .ptag-alta{background:var(--rose-dark);color:white}
+    .popup-inner .ptag-urg{background:#E8F5E9;color:#2E7D32}
 
-    /* ─── LEAFLET OVERRIDES ─── */
-    .leaflet-popup-content-wrapper { border-radius: 10px; box-shadow: 0 4px 20px rgba(0,0,0,.18); }
-    .leaflet-popup-content { margin: .8rem 1rem; }
-    .custom-cluster {
-      background: rgba(138,43,54,.85); color: white; border-radius: 50%;
-      font-size: .75rem; font-weight: 700; display: flex; align-items: center; justify-content: center;
-      border: 3px solid white; box-shadow: 0 2px 8px rgba(0,0,0,.3);
-    }
+    /* ── IMPLICATIONS ── */
+    .impl-sec{background:var(--rose-light)}
+    .impl-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.5rem;margin-top:2rem}
+    .impl-card{background:white;border-radius:12px;padding:1.8rem;box-shadow:0 2px 12px rgba(0,0,0,.04);border-top:3px solid var(--rose-dark)}
+    .impl-card h4{font-family:'DM Serif Display',serif;font-size:1.05rem;margin-bottom:.5rem}
+    .impl-card p{font-size:.85rem;color:var(--text-light);line-height:1.6}
 
-    /* ─── RESPONSIVE ─── */
-    @media (max-width: 900px) {
-      .map-content-grid { grid-template-columns: 1fr; }
-      #mapGeo { height: 420px; }
-      .findings-grid { grid-template-columns: 1fr; }
-      .team-grid { grid-template-columns: 1fr; }
+    /* ── TEAM ── */
+    .team-sec{background:white}
+    .team-grid{display:grid;grid-template-columns:1fr 1fr;gap:2.5rem;margin-top:2rem;align-items:start}
+    .team-members{display:flex;flex-direction:column;gap:.6rem}
+    .team-member{display:flex;align-items:center;gap:.8rem;padding:.8rem 1rem;background:var(--cream);border-radius:8px}
+    .team-avatar{width:36px;height:36px;border-radius:50%;background:var(--rose-dark);display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:.8rem;flex-shrink:0}
+    .team-name{font-size:.9rem;font-weight:500}
+    .source-box{background:var(--cream);border-radius:10px;padding:1.5rem;border-left:4px solid var(--gold)}
+    .source-box h4{font-size:.85rem;font-weight:700;margin-bottom:.5rem}
+    .source-box p{font-size:.82rem;color:var(--text-light);line-height:1.6}
+
+    /* ── FOOTER ── */
+    footer{background:var(--dark);padding:2.5rem 2rem;text-align:center}
+    footer p{color:rgba(255,255,255,.35);font-size:.8rem}
+    footer .fb{font-family:'DM Serif Display',serif;color:var(--gold);font-size:1rem;margin-bottom:.3rem}
+
+    /* ── RESPONSIVE ── */
+    @media(max-width:900px){
+      .map-layout{grid-template-columns:1fr;height:auto}
+      .map-sidebar{max-height:300px}
+      .map-container-wrap{height:60vh;min-height:400px}
+      .findings-grid{grid-template-columns:1fr}
+      .team-grid{grid-template-columns:1fr}
+      .map-stats-overlay{flex-wrap:wrap}
     }
-    @media (max-width: 700px) {
-      nav { padding: 0 1rem; }
-      .nav-links { display: none; flex-direction: column; position: absolute; top: 56px; left: 0; right: 0; background: var(--dark); padding: 1rem 1.5rem; gap: .8rem; }
-      .nav-links.open { display: flex; }
-      .nav-toggle { display: block; }
-      .slide { min-width: 280px; max-width: 280px; }
+    @media(max-width:700px){
+      nav{padding:0 1rem}
+      .nav-links{display:none;flex-direction:column;position:absolute;top:56px;left:0;right:0;background:var(--dark);padding:1rem 1.5rem;gap:.8rem}
+      .nav-links.open{display:flex}
+      .nav-toggle{display:block}
+      .slide{min-width:280px;max-width:280px}
+      .map-layout{grid-template-columns:1fr}
     }
   </style>
 </head>
 <body>
 
-<!-- NAV -->
 <nav>
   <div class="nav-brand">EL PESO DEL CENTRO</div>
   <button class="nav-toggle" onclick="document.querySelector('.nav-links').classList.toggle('open')">&#9776;</button>
   <ul class="nav-links">
     <li><a href="#inicio" class="active">Inicio</a></li>
-    <li><a href="#hallazgo">Hallazgo</a></li>
+    <li><a href="#hallazgo">Hallazgos</a></li>
     <li><a href="#mapa-geo">Mapa de Chile</a></li>
     <li><a href="#implicancias">Implicancias</a></li>
     <li><a href="#equipo">Equipo</a></li>
@@ -273,99 +222,83 @@
       <span>Mediante un estudio de la infraestructura de salud publica y medicos especialistas.</span>
     </h1>
     <p>Un analisis de los 3.411 establecimientos publicos y 50.000+ especialistas a lo largo de las 16 regiones del territorio nacional.</p>
-    <a href="#hallazgo" class="hero-cta">Explorar hallazgos &#8595;</a>
+    <a href="#mapa-geo" class="hero-cta">Explorar el Mapa &#8595;</a>
   </div>
 </section>
 
 <!-- CAROUSEL -->
 <section class="carousel-sec sec-full" id="hallazgo">
-  <div class="sec-full-inner">
+  <div class="sec-inner">
     <span class="sec-label">Hallazgos clave</span>
-    <h2 class="sec-title" style="color:white;">El giro inesperado de los datos</h2>
-    <p class="sec-desc">Al estandarizar por poblacion, el panorama cambia radicalmente.</p>
-    <div class="carousel-wrap">
-      <div class="carousel" id="carousel">
-
-        <!-- Slide 1 -->
-        <div class="slide slide-dark">
-          <div>
-            <h3>Tener mas edificios no garantiza especialistas en regiones perifericas.</h3>
-            <p style="font-size:.85rem;color:rgba(255,255,255,.5);line-height:1.6;margin-top:.8rem;">La gran cantidad de hospitales en la RM genera un sesgo de suficiencia. Al medir por habitante, la capital cae al promedio.</p>
-          </div>
-          <span class="caption">Fuente: DEIS / MINSAL e INE (2026)</span>
+    <h2 class="sec-title" style="color:white;margin-bottom:1.5rem;">Datos que revelan la realidad del sistema</h2>
+    <div class="carousel" id="carousel">
+      <div class="slide slide-dark">
+        <div>
+          <h3>Tener mas edificios no garantiza especialistas en regiones perifericas.</h3>
+          <p style="font-size:.85rem;color:rgba(255,255,255,.5);line-height:1.6;margin-top:.8rem;">La gran cantidad de Hospitales en la RM genera un sesgo de suficiencia. Al medir por habitante, la Capital cae al promedio.</p>
         </div>
-
-        <!-- Slide 2 -->
-        <div class="slide slide-light">
-          <span class="big" style="color:var(--rose-dark);">+3.100</span>
-          <h3 style="color:var(--text);">medicos internistas se concentran solo en la RM</h3>
-          <p style="font-size:.82rem;color:var(--text-light);line-height:1.5;margin-top:.5rem;">La Medicina Interna domina la dotacion de especialistas en casi todo el pais, liderada por la Region Metropolitana.</p>
-          <span class="caption">Fuente: RNPI / MINSAL (2026)</span>
-        </div>
-
-        <!-- Slide 3: Deficit bar chart -->
-        <div class="slide slide-light">
-          <h3 style="color:var(--text);font-size:1rem;">O'Higgins sufre el mayor deficit relativo (0,22)</h3>
-          <div class="mini-bars">
-            <div class="mini-bar-row"><span class="mini-bar-label" style="color:var(--text);">O'Higgins</span><div class="mini-bar-track"><div class="mini-bar-fill" style="width:22%;background:#555;"><span>0.22</span></div></div></div>
-            <div class="mini-bar-row"><span class="mini-bar-label" style="color:var(--text);">Los Rios</span><div class="mini-bar-track"><div class="mini-bar-fill" style="width:26%;background:#666;"><span>0.26</span></div></div></div>
-            <div class="mini-bar-row"><span class="mini-bar-label" style="color:var(--text);">Tarapaca</span><div class="mini-bar-track"><div class="mini-bar-fill" style="width:30%;background:#777;"><span>0.30</span></div></div></div>
-            <div class="mini-bar-row"><span class="mini-bar-label" style="color:var(--text);">Araucania</span><div class="mini-bar-track"><div class="mini-bar-fill" style="width:31%;background:#888;"><span>0.31</span></div></div></div>
-            <div class="mini-bar-row"><span class="mini-bar-label" style="color:var(--text);">Atacama</span><div class="mini-bar-track"><div class="mini-bar-fill" style="width:35%;background:#999;"><span>0.35</span></div></div></div>
-          </div>
-          <span class="caption" style="margin-top:auto;padding-top:1rem;">Tasa de centros alta complejidad / 100k hab.</span>
-        </div>
-
-        <!-- Slide 4: RM cae -->
-        <div class="slide slide-light">
-          <h3 style="color:var(--text);font-size:1rem;">La RM cae al promedio nacional (0,49)</h3>
-          <div class="mini-bars" style="margin-top:1.5rem;">
-            <div class="mini-bar-row"><span class="mini-bar-label" style="color:var(--text);">Magallanes</span><div class="mini-bar-track"><div class="mini-bar-fill" style="width:85%;background:#aaa;"><span>1.20</span></div></div></div>
-            <div class="mini-bar-row"><span class="mini-bar-label" style="color:var(--text);">Metropolitana</span><div class="mini-bar-track"><div class="mini-bar-fill" style="width:40%;background:var(--rose-dark);"><span>0.49</span></div></div></div>
-            <div class="mini-bar-row"><span class="mini-bar-label" style="color:var(--text);">O'Higgins</span><div class="mini-bar-track"><div class="mini-bar-fill" style="width:18%;background:#ccc;"><span>0.22</span></div></div></div>
-          </div>
-          <span class="caption" style="margin-top:auto;padding-top:1rem;">Centros alta complejidad por cada 100.000 hab.</span>
-        </div>
-
-        <!-- Slide 5: Magallanes -->
-        <div class="slide slide-light">
-          <h3 style="color:var(--text);font-size:1rem;">Magallanes lidera con 1,2 centros por 100k hab.</h3>
-          <div class="mini-bars">
-            <div class="mini-bar-row"><span class="mini-bar-label" style="color:var(--text);">Magallanes</span><div class="mini-bar-track"><div class="mini-bar-fill" style="width:100%;background:var(--rose);"><span>1.20</span></div></div></div>
-            <div class="mini-bar-row"><span class="mini-bar-label" style="color:var(--text);">Aysen</span><div class="mini-bar-track"><div class="mini-bar-fill" style="width:81%;background:var(--rose);"><span>0.97</span></div></div></div>
-            <div class="mini-bar-row"><span class="mini-bar-label" style="color:var(--text);">Maule</span><div class="mini-bar-track"><div class="mini-bar-fill" style="width:56%;background:var(--rose);"><span>0.67</span></div></div></div>
-            <div class="mini-bar-row"><span class="mini-bar-label" style="color:var(--text);">Valparaiso</span><div class="mini-bar-track"><div class="mini-bar-fill" style="width:46%;background:var(--rose);"><span>0.55</span></div></div></div>
-            <div class="mini-bar-row"><span class="mini-bar-label" style="color:var(--text);">Metropolitana</span><div class="mini-bar-track"><div class="mini-bar-fill" style="width:41%;background:var(--rose);"><span>0.49</span></div></div></div>
-            <div class="mini-bar-row"><span class="mini-bar-label" style="color:var(--text);">Antofagasta</span><div class="mini-bar-track"><div class="mini-bar-fill" style="width:41%;background:var(--rose);"><span>0.49</span></div></div></div>
-          </div>
-        </div>
-
-        <!-- Slide 6 -->
-        <div class="slide slide-rose">
-          <span class="big">35</span>
-          <h3>hospitales base en Santiago: &iquest;Todo pasa por la capital?</h3>
-          <p style="font-size:.82rem;color:rgba(255,255,255,.7);margin-top:.8rem;">Al estandarizar por habitante, la RM iguala a Antofagasta y queda lejos de Magallanes.</p>
-        </div>
-
+        <span class="caption">Fuente: DEIS / MINSAL e INE (2026)</span>
       </div>
-      <div class="carousel-nav" id="carouselNav"></div>
+      <div class="slide slide-light">
+        <span class="big">+3.100</span>
+        <h3 style="color:var(--text);">medicos internistas se concentran solo en la RM</h3>
+        <p style="font-size:.82rem;color:var(--text-light);line-height:1.5;margin-top:.5rem;">La Medicina Interna domina la dotacion de especialistas en casi todo el pais, liderada por la Region Metropolitana.</p>
+        <span class="caption">Fuente: RNPI / MINSAL (2026)</span>
+      </div>
+      <div class="slide slide-light">
+        <h3 style="color:var(--text);font-size:1rem;">O'Higgins sufre el mayor deficit relativo (0,22)</h3>
+        <div class="mini-bars">
+          <div class="mini-bar-row"><span class="mini-bar-label" style="color:var(--text)">O'Higgins</span><div class="mini-bar-track"><div class="mini-bar-fill" style="width:22%;background:#555"><span>0.22</span></div></div></div>
+          <div class="mini-bar-row"><span class="mini-bar-label" style="color:var(--text)">Los Rios</span><div class="mini-bar-track"><div class="mini-bar-fill" style="width:26%;background:#666"><span>0.26</span></div></div></div>
+          <div class="mini-bar-row"><span class="mini-bar-label" style="color:var(--text)">Tarapaca</span><div class="mini-bar-track"><div class="mini-bar-fill" style="width:30%;background:#777"><span>0.30</span></div></div></div>
+          <div class="mini-bar-row"><span class="mini-bar-label" style="color:var(--text)">Araucania</span><div class="mini-bar-track"><div class="mini-bar-fill" style="width:31%;background:#888"><span>0.31</span></div></div></div>
+          <div class="mini-bar-row"><span class="mini-bar-label" style="color:var(--text)">Atacama</span><div class="mini-bar-track"><div class="mini-bar-fill" style="width:35%;background:#999"><span>0.35</span></div></div></div>
+        </div>
+        <span class="caption" style="margin-top:auto;padding-top:1rem">Tasa de centros alta complejidad / 100k hab.</span>
+      </div>
+      <div class="slide slide-light">
+        <h3 style="color:var(--text);font-size:1rem;">La RM cae al promedio nacional (0,49)</h3>
+        <div class="mini-bars" style="margin-top:1.5rem">
+          <div class="mini-bar-row"><span class="mini-bar-label" style="color:var(--text)">Magallanes</span><div class="mini-bar-track"><div class="mini-bar-fill" style="width:85%;background:#aaa"><span>1.20</span></div></div></div>
+          <div class="mini-bar-row"><span class="mini-bar-label" style="color:var(--text)">Metropolitana</span><div class="mini-bar-track"><div class="mini-bar-fill" style="width:40%;background:var(--rose-dark)"><span>0.49</span></div></div></div>
+          <div class="mini-bar-row"><span class="mini-bar-label" style="color:var(--text)">O'Higgins</span><div class="mini-bar-track"><div class="mini-bar-fill" style="width:18%;background:#ccc"><span>0.22</span></div></div></div>
+        </div>
+        <span class="caption" style="margin-top:auto;padding-top:1rem">Centros alta complejidad por cada 100.000 hab.</span>
+      </div>
+      <div class="slide slide-light">
+        <h3 style="color:var(--text);font-size:1rem;">Magallanes lidera con 1,2 centros por 100k hab.</h3>
+        <div class="mini-bars">
+          <div class="mini-bar-row"><span class="mini-bar-label" style="color:var(--text)">Magallanes</span><div class="mini-bar-track"><div class="mini-bar-fill" style="width:100%;background:var(--rose)"><span>1.20</span></div></div></div>
+          <div class="mini-bar-row"><span class="mini-bar-label" style="color:var(--text)">Aysen</span><div class="mini-bar-track"><div class="mini-bar-fill" style="width:81%;background:var(--rose)"><span>0.97</span></div></div></div>
+          <div class="mini-bar-row"><span class="mini-bar-label" style="color:var(--text)">Maule</span><div class="mini-bar-track"><div class="mini-bar-fill" style="width:56%;background:var(--rose)"><span>0.67</span></div></div></div>
+          <div class="mini-bar-row"><span class="mini-bar-label" style="color:var(--text)">Valparaiso</span><div class="mini-bar-track"><div class="mini-bar-fill" style="width:46%;background:var(--rose)"><span>0.55</span></div></div></div>
+          <div class="mini-bar-row"><span class="mini-bar-label" style="color:var(--text)">Metropolitana</span><div class="mini-bar-track"><div class="mini-bar-fill" style="width:41%;background:var(--rose)"><span>0.49</span></div></div></div>
+          <div class="mini-bar-row"><span class="mini-bar-label" style="color:var(--text)">Antofagasta</span><div class="mini-bar-track"><div class="mini-bar-fill" style="width:41%;background:var(--rose)"><span>0.49</span></div></div></div>
+        </div>
+      </div>
+      <div class="slide slide-rose">
+        <span class="big">35</span>
+        <h3>Hospitales base en Santiago: &iquest;Todo pasa por la Capital?</h3>
+        <p style="font-size:.82rem;color:rgba(255,255,255,.7);margin-top:.8rem;">Al estandarizar por habitante, la RM iguala a Antofagasta y queda lejos de Magallanes.</p>
+      </div>
     </div>
+    <div class="carousel-nav" id="carouselNav"></div>
   </div>
 </section>
 
-<!-- FINDINGS TEXT -->
+<!-- FINDINGS -->
 <section class="findings-sec sec-full">
-  <div class="sec-full-inner">
-    <span class="sec-label">El mito del volumen bruto</span>
-    <h2 class="sec-title">La crisis no radica en la cantidad bruta de infraestructura</h2>
-    <p class="sec-desc">Sino en la deficiente distribucion territorial del personal y la capacidad real por habitante.</p>
+  <div class="sec-inner">
+    <span class="sec-label">Hallazgos</span>
+    <h2 class="sec-title">La crisis no radica en la cantidad de infraestructura</h2>
+    <p class="sec-desc" style="margin-bottom:.5rem">Sino en la deficiente distribucion territorial del personal y la capacidad real por habitante.</p>
     <div class="findings-grid">
       <div class="finding-block">
         <h3>El volumen engana</h3>
         <p>La RM concentra 35 centros de alta complejidad (5,7% de sus establecimientos), pero su tasa per capita (0,49/100k) apenas iguala el promedio nacional. El volumen bruto no refleja cobertura real.</p>
       </div>
       <div class="finding-block">
-        <h3>5 regiones con un unico hospital</h3>
+        <h3>5 regiones con un unico Hospital</h3>
         <p>Tarapaca, Atacama, Los Rios, Aysen y Arica y Parinacota dependen exclusivamente de un unico centro de alta complejidad. Cualquier falla deja a toda la region sin cobertura.</p>
       </div>
       <div class="finding-block">
@@ -374,55 +307,46 @@
       </div>
       <div class="finding-block">
         <h3>Brecha de especialistas</h3>
-        <p>La RM cuenta con 390 especialistas por 100k habitantes. Tarapaca solo tiene 66. Una diferencia de casi 6 veces que compromete la atencion en regiones perifericas.</p>
+        <p>La RM cuenta con 390 especialistas por 100k habitantes. Tarapaca solo tiene 66. Una diferencia de casi 6 veces que compromete la atencion en regiones.</p>
       </div>
     </div>
   </div>
 </section>
 
-<!-- MAP SECTION -->
-<section class="map-content-sec sec-full" id="mapa-geo">
-  <div class="sec-full-inner">
-    <span class="sec-label">Mapa de Chile</span>
-    <h2 class="sec-title">81 centros de alta complejidad en todo el pais</h2>
-    <p class="sec-desc">Haz clic en cada punto para ver informacion del hospital. Los marcadores rojos son alta complejidad.</p>
-    <div class="map-content-grid">
-      <div class="map-text">
-        <h3>La concentracion visible</h3>
-        <p>Al visualizar la ubicacion geografica de los 81 hospitales de alta complejidad, el patron de concentracion en la zona central se hace evidente. La Region Metropolitana acumula 35 de estos centros en un area reducida, mientras regiones extensas como La Araucania o Los Lagos cuentan con solo 3.</p>
-
-        <div class="stat-row">
-          <div class="stat-item">
-            <span class="stat-val">3.411</span>
-            <span class="stat-lbl">Establ. publicos</span>
-          </div>
-          <div class="stat-item">
-            <span class="stat-val">81</span>
-            <span class="stat-lbl">Alta complejidad</span>
-          </div>
-          <div class="stat-item">
-            <span class="stat-val">2,4%</span>
-            <span class="stat-lbl">Del total nacional</span>
-          </div>
+<!-- ═══════════ MAP SECTION (PROTAGONIST) ═══════════ -->
+<section class="map-hero" id="mapa-geo">
+  <div class="map-hero-header">
+    <span class="sec-label">Mapa interactivo</span>
+    <h2 class="sec-title">81 centros de alta complejidad en Chile</h2>
+    <p class="sec-desc">Busca o haz clic en un Hospital para ver su informacion. Explora como se distribuyen a lo largo del territorio.</p>
+  </div>
+  <div class="map-layout">
+    <!-- SIDEBAR -->
+    <div class="map-sidebar">
+      <div class="search-wrap">
+        <div class="search-box">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+          <input type="text" id="searchInput" placeholder="Buscar Hospital..." autocomplete="off">
         </div>
-
-        <p>Nosotros vemos la centralizacion a traves de dos factores: las estructuras (los hospitales) y los profesionales (especialistas). La proporcion se calcula contra la cantidad de personas habitantes en cada region.</p>
-
-        <div class="map-legend-box">
-          <span style="font-size:.72rem;font-weight:700;color:var(--text);letter-spacing:.05em;">LEYENDA:</span>
-          <div class="legend-item"><span class="legend-dot" style="background:var(--rose-dark);"></span> Alta complejidad</div>
-        </div>
+        <div class="search-count" id="searchCount">80 Establecimientos de alta complejidad</div>
       </div>
-      <div>
-        <div id="mapGeo"></div>
+      <div class="hosp-list" id="hospList"></div>
+    </div>
+    <!-- MAP -->
+    <div class="map-container-wrap">
+      <div class="map-stats-overlay">
+        <div class="map-stat-pill"><span class="val">3.411</span><span class="lbl">Establ.</span></div>
+        <div class="map-stat-pill"><span class="val">81</span><span class="lbl">Alta Comp.</span></div>
+        <div class="map-stat-pill"><span class="val">2,4%</span><span class="lbl">Del total</span></div>
       </div>
+      <div id="mapGeo"></div>
     </div>
   </div>
 </section>
 
 <!-- IMPLICATIONS -->
 <section class="impl-sec sec-full" id="implicancias">
-  <div class="sec-full-inner">
+  <div class="sec-inner">
     <span class="sec-label">Implicancias</span>
     <h2 class="sec-title">Lo que revelan los datos para la politica publica</h2>
     <div class="impl-cards">
@@ -432,11 +356,11 @@
       </div>
       <div class="impl-card">
         <h4>Incentivos a especialistas</h4>
-        <p>Con 390 especialistas por 100k hab. en la RM frente a 66 en Tarapaca, se requieren politicas de incentivo para la migracion de profesionales a regiones perifericas.</p>
+        <p>Con 390 especialistas por 100k hab. en la RM frente a 66 en Tarapaca, se requieren politicas de incentivo para la migracion de profesionales a regiones.</p>
       </div>
       <div class="impl-card">
         <h4>Resiliencia del sistema</h4>
-        <p>5 regiones dependen de un unico hospital de alta complejidad. Esto representa un riesgo critico ante emergencias o desastres naturales.</p>
+        <p>5 regiones dependen de un unico Hospital de alta complejidad. Esto representa un riesgo critico ante emergencias o desastres naturales.</p>
       </div>
     </div>
   </div>
@@ -444,7 +368,7 @@
 
 <!-- TEAM -->
 <section class="team-sec sec-full" id="equipo">
-  <div class="sec-full-inner">
+  <div class="sec-inner">
     <span class="sec-label">&iquest;Quienes somos?</span>
     <h2 class="sec-title">Equipo de investigacion</h2>
     <div class="team-grid">
@@ -460,8 +384,8 @@
       <div class="source-box">
         <h4>Fuentes de datos</h4>
         <p><strong>Base de Establecimientos de Salud</strong> &mdash; DEIS, Departamento de Estadisticas e Informacion de Salud del Ministerio de Salud. Agosto 2026.</p>
-        <p style="margin-top:.5rem;"><strong>Registro Nacional de Prestadores Individuales (RNPI)</strong> &mdash; Base de especialistas medicos por region de trabajo.</p>
-        <p style="margin-top:.5rem;"><strong>INE</strong> &mdash; Poblacion estimada por region, 2026.</p>
+        <p style="margin-top:.5rem"><strong>Registro Nacional de Prestadores Individuales (RNPI)</strong> &mdash; Base de especialistas medicos por region de trabajo.</p>
+        <p style="margin-top:.5rem"><strong>INE</strong> &mdash; Poblacion estimada por region, 2026.</p>
       </div>
     </div>
   </div>
@@ -474,68 +398,231 @@
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-// ═══ HOSPITAL DATA ═══
-const hospitales = [{"n":"Hospital Base Valdivia","la":-39.83181,"lo":-73.24014,"r":"Los Ríos","c":"Valdivia","u":"SI"},{"n":"Hospital FFAA Cirujano Guzmán","la":-53.14966,"lo":-70.89719,"r":"Magallanes","c":"Punta Arenas","u":"SI"},{"n":"Hospital Clínico de Magallanes Dr. Lautaro Navarro Avaria","la":-53.12215,"lo":-70.89623,"r":"Magallanes","c":"Punta Arenas","u":"SI"},{"n":"Hospital Regional de Coyhaique","la":-45.5684,"lo":-72.07342,"r":"Aysén","c":"Coyhaique","u":"SI"},{"n":"Hospital de Castro","la":-42.47704,"lo":-73.76933,"r":"Los Lagos","c":"Castro","u":"SI"},{"n":"Hospital de Puerto Montt","la":-41.44855,"lo":-72.95734,"r":"Los Lagos","c":"Puerto Montt","u":"SI"},{"n":"Hospital Base San José de Osorno","la":-40.5883,"lo":-73.12779,"r":"Los Lagos","c":"Osorno","u":"SI"},{"n":"Hospital Dr. Hernán Henríquez Aravena (Temuco)","la":-38.73653,"lo":-72.59924,"r":"La Araucanía","c":"Temuco","u":"SI"},{"n":"Hospital San José de Victoria","la":-38.23394,"lo":-72.34016,"r":"La Araucanía","c":"Victoria","u":"SI"},{"n":"Hospital Dr. Mauricio Heyermann (Angol)","la":-37.80054,"lo":-72.69063,"r":"La Araucanía","c":"Angol","u":"SI"},{"n":"Complejo Asistencial Dr. Víctor Ríos Ruiz (Los Ángeles)","la":-37.47365,"lo":-72.3469,"r":"Biobío","c":"Los Ángeles","u":"SI"},{"n":"Hospital de Lota","la":-37.09019,"lo":-73.15554,"r":"Biobío","c":"Lota","u":"SI"},{"n":"Hospital San José de Coronel","la":-37.02824,"lo":-73.13586,"r":"Biobío","c":"Coronel","u":"SI"},{"n":"Hospital Clínico Regional Dr. Guillermo Grant Benavente (Concepción)","la":-36.82511,"lo":-73.03795,"r":"Biobío","c":"Concepción","u":"SI"},{"n":"Hospital Las Higueras (Talcahuano)","la":-36.7401,"lo":-73.10869,"r":"Biobío","c":"Talcahuano","u":"SI"},{"n":"Hospital de Tomé","la":-36.61332,"lo":-72.95455,"r":"Biobío","c":"Tome","u":"SI"},{"n":"Hospital Clínico Herminda Martín (Chillán)","la":-36.60883,"lo":-72.09267,"r":"Ñuble","c":"Chillán","u":"SI"},{"n":"Hospital de San Carlos","la":-36.42993,"lo":-71.95983,"r":"Ñuble","c":"San Carlos","u":"SI"},{"n":"Hospital Presidente Carlos Ibáñez del Campo (Linares)","la":-35.84428,"lo":-71.59099,"r":"Maule","c":"Linares","u":"SI"},{"n":"Hospital Dr. César Garavagno Burotto (Talca)","la":-35.4269,"lo":-71.64637,"r":"Maule","c":"Talca","u":"SI"},{"n":"Hospital San Juan de Dios (Curicó)","la":-34.97812,"lo":-71.21336,"r":"Maule","c":"Curicó","u":"SI"},{"n":"Hospital San Juan de Dios de San Fernando","la":-34.57591,"lo":-70.99256,"r":"O'Higgins","c":"San Fernando","u":"SI"},{"n":"Hospital Dr. Franco Ravera Zunino","la":-34.15536,"lo":-70.76672,"r":"O'Higgins","c":"Rancagua","u":"SI"},{"n":"Hospital San José (Melipilla)","la":-33.69526,"lo":-71.21467,"r":"Metropolitana","c":"Melipilla","u":"SI"},{"n":"Hospital El Pino (San Bernardo)","la":-33.58435,"lo":-70.67679,"r":"Metropolitana","c":"San Bernardo","u":"SI"},{"n":"Complejo Hospitalario Dr. Sótero del Río (Puente Alto)","la":-33.57725,"lo":-70.58178,"r":"Metropolitana","c":"Puente Alto","u":"SI"},{"n":"Hospital Padre Alberto Hurtado (San Ramón)","la":-33.5525,"lo":-70.63502,"r":"Metropolitana","c":"San Ramón","u":"SI"},{"n":"Hospital Clínico Metropolitano La Florida","la":-33.51416,"lo":-70.59915,"r":"Metropolitana","c":"La Florida","u":"SI"},{"n":"Hospital Clínico Metropolitano El Carmen (Maipú)","la":-33.50821,"lo":-70.77425,"r":"Metropolitana","c":"Maipú","u":"SI"},{"n":"Hospital Dr. Luis Tisné B. (Peñalolén)","la":-33.50133,"lo":-70.57941,"r":"Metropolitana","c":"Peñalolén","u":"SI"},{"n":"Hospital Barros Luco Trudeau (San Miguel)","la":-33.48515,"lo":-70.64444,"r":"Metropolitana","c":"San Miguel","u":"SI"},{"n":"Hospital Dr. Exequiel González Cortés","la":-33.48476,"lo":-70.64813,"r":"Metropolitana","c":"San Miguel","u":"SI"},{"n":"Hospital Clínico San Borja Arriarán","la":-33.4605,"lo":-70.64232,"r":"Metropolitana","c":"Santiago","u":"SI"},{"n":"Hospital Militar de Santiago","la":-33.45049,"lo":-70.53818,"r":"Metropolitana","c":"La Reina","u":"SI"},{"n":"Hospital de Urgencia Asistencia Pública","la":-33.444,"lo":-70.63796,"r":"Metropolitana","c":"Santiago","u":"SI"},{"n":"Hospital San Juan de Dios (Santiago)","la":-33.44239,"lo":-70.67919,"r":"Metropolitana","c":"Santiago","u":"SI"},{"n":"Instituto de Neurocirugía Dr. Alfonso Asenjo","la":-33.43689,"lo":-70.62245,"r":"Metropolitana","c":"Providencia","u":"SI"},{"n":"Hospital Del Salvador de Santiago","la":-33.43664,"lo":-70.62449,"r":"Metropolitana","c":"Providencia","u":"SI"},{"n":"Hospital de Niños Dr. Luis Calvo Mackenna","la":-33.42985,"lo":-70.61453,"r":"Metropolitana","c":"Providencia","u":"SI"},{"n":"Instituto Nacional del Cáncer","la":-33.41813,"lo":-70.65211,"r":"Metropolitana","c":"Independencia","u":"SI"},{"n":"Complejo Hospitalario San José (Independencia)","la":-33.41659,"lo":-70.65332,"r":"Metropolitana","c":"Independencia","u":"SI"},{"n":"Hospital Clínico de Niños Dr. Roberto del Río","la":-33.41533,"lo":-70.65509,"r":"Metropolitana","c":"Independencia","u":"SI"},{"n":"Hospital Félix Bulnes Cerda","la":-33.42363,"lo":-70.74166,"r":"Metropolitana","c":"Cerro Navia","u":"SI"},{"n":"Hospital FACH","la":-33.39533,"lo":-70.54807,"r":"Metropolitana","c":"Las Condes","u":"SI"},{"n":"Hospital Claudio Vicuña (San Antonio)","la":-33.58881,"lo":-71.60862,"r":"Valparaíso","c":"San Antonio","u":"SI"},{"n":"Hospital Dr. Eduardo Pereira Ramírez","la":-33.05679,"lo":-71.58962,"r":"Valparaíso","c":"Valparaíso","u":"SI"},{"n":"Hospital de Quilpué","la":-33.05196,"lo":-71.43393,"r":"Valparaíso","c":"Quilpué","u":"SI"},{"n":"Hospital Carlos Van Buren (Valparaíso)","la":-33.05026,"lo":-71.6111,"r":"Valparaíso","c":"Valparaíso","u":"SI"},{"n":"Hospital Dr. Gustavo Fricke (Viña del Mar)","la":-33.0294,"lo":-71.54172,"r":"Valparaíso","c":"Viña del Mar","u":"SI"},{"n":"Hospital Naval Almirante Neff","la":-32.99838,"lo":-71.54382,"r":"Valparaíso","c":"Viña del Mar","u":"SI"},{"n":"Hospital Biprovincial Quillota Petorca","la":-32.90192,"lo":-71.25211,"r":"Valparaíso","c":"Quillota","u":"SI"},{"n":"Hospital San Juan de Dios (Los Andes)","la":-32.82966,"lo":-70.59643,"r":"Valparaíso","c":"Los Andes","u":"SI"},{"n":"Hospital San Camilo de San Felipe","la":-32.74977,"lo":-70.70899,"r":"Valparaíso","c":"San Felipe","u":"SI"},{"n":"Hospital Dr. Antonio Tirado Lanas de Ovalle","la":-30.59961,"lo":-71.20003,"r":"Coquimbo","c":"Ovalle","u":"SI"},{"n":"Hospital San Pablo (Coquimbo)","la":-29.96849,"lo":-71.33702,"r":"Coquimbo","c":"Coquimbo","u":"SI"},{"n":"Hospital San Juan de Dios (La Serena)","la":-29.90819,"lo":-71.24973,"r":"Coquimbo","c":"La Serena","u":"SI"},{"n":"Hospital San José del Carmen (Copiapó)","la":-27.37335,"lo":-70.32213,"r":"Atacama","c":"Copiapó","u":"SI"},{"n":"Hospital Dr. Leonardo Guzmán (Antofagasta)","la":-23.61685,"lo":-70.38592,"r":"Antofagasta","c":"Antofagasta","u":"SI"},{"n":"Centro Oncológico del Norte (CON)","la":-23.56915,"lo":-70.3791,"r":"Antofagasta","c":"Antofagasta","u":"SI"},{"n":"Hospital Dr. Carlos Cisternas (Calama)","la":-22.4452,"lo":-68.91826,"r":"Antofagasta","c":"Calama","u":"SI"},{"n":"Hospital Dr. Ernesto Torres Galdames (Iquique)","la":-20.21435,"lo":-70.13893,"r":"Tarapacá","c":"Iquique","u":"SI"},{"n":"Hospital Regional Dr. Juan Noé Crevani (Arica)","la":-18.48248,"lo":-70.31295,"r":"Arica y Parinacota","c":"Arica","u":"SI"}];
+// ═══ DATA ═══
+const hospitales = [
+{"n":"Hospital Regional Dr. Juan Noé Crevani (Arica)","la":-18.482478,"lo":-70.312948,"r":"Arica y Parinacota","c":"Arica","u":"SI"},
+{"n":"Hospital Dr. Ernesto Torres Galdames (Iquique)","la":-20.214354,"lo":-70.138931,"r":"Tarapacá","c":"Iquique","u":"SI"},
+{"n":"Centro Oncológico del Norte (CON)","la":-23.569147,"lo":-70.379095,"r":"Antofagasta","c":"Antofagasta","u":"SI"},
+{"n":"Hospital Dr. Carlos Cisternas (Calama)","la":-22.445201,"lo":-68.918257,"r":"Antofagasta","c":"Calama","u":"SI"},
+{"n":"Hospital Dr. Leonardo Guzmán (Antofagasta)","la":-23.616852,"lo":-70.385924,"r":"Antofagasta","c":"Antofagasta","u":"SI"},
+{"n":"Hospital San José del Carmen (Copiapó)","la":-27.373352,"lo":-70.322127,"r":"Atacama","c":"Copiapó","u":"SI"},
+{"n":"Hospital Dr. Antonio Tirado Lanas de Ovalle","la":-30.599614,"lo":-71.200031,"r":"Coquimbo","c":"Ovalle","u":"SI"},
+{"n":"Hospital San Juan de Dios (La Serena)","la":-29.908191,"lo":-71.249732,"r":"Coquimbo","c":"La Serena","u":"SI"},
+{"n":"Hospital San Pablo (Coquimbo)","la":-29.968488,"lo":-71.337017,"r":"Coquimbo","c":"Coquimbo","u":"SI"},
+{"n":"Centro de Sangre y Tejidos IV y V Región","la":-33.052658,"lo":-71.609776,"r":"Valparaíso","c":"Valparaíso","u":"NO"},
+{"n":"Hospital Biprovincial Quillota Petorca","la":-32.901916,"lo":-71.252111,"r":"Valparaíso","c":"Quillota","u":"SI"},
+{"n":"Hospital Carlos Van Buren (Valparaíso)","la":-33.050258,"lo":-71.611098,"r":"Valparaíso","c":"Valparaíso","u":"SI"},
+{"n":"Hospital Claudio Vicuña (San Antonio)","la":-33.588809,"lo":-71.608623,"r":"Valparaíso","c":"San Antonio","u":"SI"},
+{"n":"Hospital Dr. Eduardo Pereira Ramírez (Valparaíso)","la":-33.05679,"lo":-71.58962,"r":"Valparaíso","c":"Valparaíso","u":"NO"},
+{"n":"Hospital Dr. Gustavo Fricke (Viña del Mar)","la":-33.0294,"lo":-71.541725,"r":"Valparaíso","c":"Viña del Mar","u":"SI"},
+{"n":"Hospital Naval Almirante Neff","la":-32.998382,"lo":-71.54382,"r":"Valparaíso","c":"Viña del Mar","u":"SI"},
+{"n":"Hospital San Camilo de San Felipe","la":-32.74977,"lo":-70.708992,"r":"Valparaíso","c":"San Felipe","u":"SI"},
+{"n":"Hospital San Juan de Dios (Los Andes)","la":-32.829664,"lo":-70.59643,"r":"Valparaíso","c":"Los Andes","u":"SI"},
+{"n":"Hospital de Quilpué","la":-33.051961,"lo":-71.433933,"r":"Valparaíso","c":"Quilpué","u":"SI"},
+{"n":"Centro de Sangre y Tejidos Metropolitano","la":-33.41889,"lo":-70.605024,"r":"Metropolitana","c":"Providencia","u":"NO"},
+{"n":"Centro Metropolitano de Atención Prehospitalaria (SAMU)","la":-33.437666,"lo":-70.644218,"r":"Metropolitana","c":"Santiago","u":"SI"},
+{"n":"Centro de Imagenología Mamaria Metropolitano","la":-33.484821,"lo":-70.644294,"r":"Metropolitana","c":"San Miguel","u":"NO"},
+{"n":"Complejo Hospitalario Dr. Sótero del Río (Puente Alto)","la":-33.577251,"lo":-70.581781,"r":"Metropolitana","c":"Puente Alto","u":"SI"},
+{"n":"Complejo Hospitalario San José (Independencia)","la":-33.416586,"lo":-70.653318,"r":"Metropolitana","c":"Independencia","u":"SI"},
+{"n":"Hospital Félix Bulnes Cerda","la":-33.423625,"lo":-70.741664,"r":"Metropolitana","c":"Cerro Navia","u":"SI"},
+{"n":"Hospital Barros Luco Trudeau (San Miguel)","la":-33.485147,"lo":-70.644439,"r":"Metropolitana","c":"San Miguel","u":"SI"},
+{"n":"Hospital Carabineros","la":-33.450658,"lo":-70.608463,"r":"Metropolitana","c":"Ñuñoa","u":"SI"},
+{"n":"Hospital Clínico Metropolitano El Carmen (Maipú)","la":-33.508212,"lo":-70.774248,"r":"Metropolitana","c":"Maipú","u":"SI"},
+{"n":"Hospital Clínico Metropolitano La Florida","la":-33.514161,"lo":-70.599148,"r":"Metropolitana","c":"La Florida","u":"SI"},
+{"n":"Hospital Clínico San Borja Arriarán","la":-33.460498,"lo":-70.64232,"r":"Metropolitana","c":"Santiago","u":"SI"},
+{"n":"Hospital Clínico Universidad de Chile","la":-33.420057,"lo":-70.653116,"r":"Metropolitana","c":"Independencia","u":"SI"},
+{"n":"Hospital Clínico de Niños Dr. Roberto del Río","la":-33.415335,"lo":-70.655086,"r":"Metropolitana","c":"Independencia","u":"SI"},
+{"n":"Hospital Del Salvador de Santiago","la":-33.43664,"lo":-70.624493,"r":"Metropolitana","c":"Providencia","u":"SI"},
+{"n":"Hospital Dipreca Teniente Hernán Merino","la":-33.417683,"lo":-70.528194,"r":"Metropolitana","c":"Las Condes","u":"SI"},
+{"n":"Hospital Dr. Exequiel González Cortés (San Miguel)","la":-33.484761,"lo":-70.648129,"r":"Metropolitana","c":"San Miguel","u":"SI"},
+{"n":"Hospital Dr. Luis Tisné B. (Peñalolén)","la":-33.501328,"lo":-70.579408,"r":"Metropolitana","c":"Peñalolén","u":"SI"},
+{"n":"Hospital El Pino (San Bernardo)","la":-33.58435,"lo":-70.676793,"r":"Metropolitana","c":"San Bernardo","u":"SI"},
+{"n":"Hospital FACH","la":-33.395327,"lo":-70.548074,"r":"Metropolitana","c":"Las Condes","u":"SI"},
+{"n":"Hospital Metropolitano (Ex Militar)","la":-33.418942,"lo":-70.605168,"r":"Metropolitana","c":"Providencia","u":"NO"},
+{"n":"Hospital Militar de Santiago","la":-33.450493,"lo":-70.538184,"r":"Metropolitana","c":"La Reina","u":"SI"},
+{"n":"Hospital Padre Alberto Hurtado (San Ramón)","la":-33.5525,"lo":-70.635024,"r":"Metropolitana","c":"San Ramón","u":"SI"},
+{"n":"Hospital Parroquial de San Bernardo","la":-33.592835,"lo":-70.697393,"r":"Metropolitana","c":"San Bernardo","u":"SI"},
+{"n":"Hospital San José (Melipilla)","la":-33.69526,"lo":-71.214668,"r":"Metropolitana","c":"Melipilla","u":"SI"},
+{"n":"Hospital San Juan de Dios (Santiago)","la":-33.442394,"lo":-70.679188,"r":"Metropolitana","c":"Santiago","u":"SI"},
+{"n":"Hospital de Niños Dr. Luis Calvo Mackenna","la":-33.429848,"lo":-70.614527,"r":"Metropolitana","c":"Providencia","u":"SI"},
+{"n":"Hospital de Urgencia Asistencia Pública Dr. Alejandro del Río","la":-33.444004,"lo":-70.637955,"r":"Metropolitana","c":"Santiago","u":"SI"},
+{"n":"Instituto Nacional Geriátrico Pdte. Eduardo Frei Montalva","la":-33.434825,"lo":-70.622227,"r":"Metropolitana","c":"Providencia","u":"NO"},
+{"n":"Instituto Nacional de Enfermedades Respiratorias y Cirugía Torácica","la":-33.437988,"lo":-70.621882,"r":"Metropolitana","c":"Providencia","u":"NO"},
+{"n":"Instituto Nacional de Rehabilitación Infantil Pdte. Pedro Aguirre Cerda","la":-33.460454,"lo":-70.569892,"r":"Metropolitana","c":"Peñalolén","u":"NO"},
+{"n":"Instituto Nacional del Cáncer Dr. Caupolicán Pardo Correa","la":-33.418128,"lo":-70.652105,"r":"Metropolitana","c":"Independencia","u":"NO"},
+{"n":"Instituto Psiquiátrico Dr. José Horwitz Barak","la":-33.422402,"lo":-70.650537,"r":"Metropolitana","c":"Recoleta","u":"NO"},
+{"n":"Instituto Traumatológico Dr. Teodoro Gebauer","la":-33.434891,"lo":-70.658236,"r":"Metropolitana","c":"Santiago","u":"SI"},
+{"n":"Instituto de Neurocirugía Dr. Alfonso Asenjo","la":-33.436888,"lo":-70.622448,"r":"Metropolitana","c":"Providencia","u":"SI"},
+{"n":"Hospital Dr. Franco Ravera Zunino","la":-34.155358,"lo":-70.766723,"r":"O'Higgins","c":"Rancagua","u":"SI"},
+{"n":"Hospital San Juan de Dios de San Fernando","la":-34.575908,"lo":-70.992563,"r":"O'Higgins","c":"San Fernando","u":"SI"},
+{"n":"CREA Chile","la":-35.42689,"lo":-71.667409,"r":"Maule","c":"Talca","u":"NO"},
+{"n":"Centro La Escalera","la":-35.426103,"lo":-71.645748,"r":"Maule","c":"Talca","u":"NO"},
+{"n":"Centro Reproductivo Regional de Sangre","la":-35.424841,"lo":-71.664407,"r":"Maule","c":"Talca","u":"NO"},
+{"n":"Hospital Dr. César Garavagno Burotto (Talca)","la":-35.426896,"lo":-71.646373,"r":"Maule","c":"Talca","u":"SI"},
+{"n":"Hospital Presidente Carlos Ibáñez del Campo (Linares)","la":-35.844282,"lo":-71.590991,"r":"Maule","c":"Linares","u":"SI"},
+{"n":"Hospital San Juan de Dios (Curicó)","la":-34.978121,"lo":-71.213364,"r":"Maule","c":"Curicó","u":"SI"},
+{"n":"Nexos Ltda.","la":-35.409806,"lo":-71.65181,"r":"Maule","c":"Talca","u":"NO"},
+{"n":"Hospital Clínico Herminda Martín (Chillán)","la":-36.608831,"lo":-72.092671,"r":"Ñuble","c":"Chillán","u":"SI"},
+{"n":"Hospital de San Carlos","la":-36.429931,"lo":-71.959831,"r":"Ñuble","c":"San Carlos","u":"SI"},
+{"n":"Complejo Asistencial Dr. Víctor Ríos Ruiz (Los Ángeles)","la":-37.47365,"lo":-72.346903,"r":"Biobío","c":"Los Ángeles","u":"SI"},
+{"n":"Hospital Clínico Regional Dr. Guillermo Grant Benavente (Concepción)","la":-36.82511,"lo":-73.037951,"r":"Biobío","c":"Concepción","u":"SI"},
+{"n":"Hospital Las Higueras (Talcahuano)","la":-36.740101,"lo":-73.108694,"r":"Biobío","c":"Talcahuano","u":"SI"},
+{"n":"Hospital San José de Coronel","la":-37.028242,"lo":-73.135861,"r":"Biobío","c":"Coronel","u":"SI"},
+{"n":"Hospital de Lota","la":-37.09019,"lo":-73.155535,"r":"Biobío","c":"Lota","u":"SI"},
+{"n":"Hospital de Tomé","la":-36.613323,"lo":-72.954554,"r":"Biobío","c":"Tome","u":"SI"},
+{"n":"Hospital Dr. Hernán Henríquez Aravena (Temuco)","la":-38.736532,"lo":-72.599238,"r":"La Araucanía","c":"Temuco","u":"SI"},
+{"n":"Hospital Dr. Mauricio Heyermann (Angol)","la":-37.800539,"lo":-72.690635,"r":"La Araucanía","c":"Angol","u":"SI"},
+{"n":"Hospital San José de Victoria","la":-38.233942,"lo":-72.340159,"r":"La Araucanía","c":"Victoria","u":"SI"},
+{"n":"Hospital Base Valdivia","la":-39.831807,"lo":-73.240138,"r":"Los Ríos","c":"Valdivia","u":"SI"},
+{"n":"Hospital Base San José de Osorno","la":-40.5883,"lo":-73.127785,"r":"Los Lagos","c":"Osorno","u":"SI"},
+{"n":"Hospital de Castro","la":-42.477043,"lo":-73.76933,"r":"Los Lagos","c":"Castro","u":"SI"},
+{"n":"Hospital de Puerto Montt","la":-41.44855,"lo":-72.957342,"r":"Los Lagos","c":"Puerto Montt","u":"SI"},
+{"n":"Hospital Regional de Coyhaique","la":-45.568399,"lo":-72.073423,"r":"Aysén","c":"Coyhaique","u":"SI"},
+{"n":"Hospital Clínico de Magallanes Dr. Lautaro Navarro Avaria","la":-53.12215,"lo":-70.896232,"r":"Magallanes","c":"Punta Arenas","u":"SI"},
+{"n":"Hospital FFAA Cirujano Guzmán","la":-53.149659,"lo":-70.897186,"r":"Magallanes","c":"Punta Arenas","u":"SI"}
+];
+
+// region order north to south
+const regionOrder = ["Arica y Parinacota","Tarapacá","Antofagasta","Atacama","Coquimbo","Valparaíso","Metropolitana","O'Higgins","Maule","Ñuble","Biobío","La Araucanía","Los Ríos","Los Lagos","Aysén","Magallanes"];
 
 // ═══ MAP ═══
-const map = L.map('mapGeo', { zoomControl: true, scrollWheelZoom: true }).setView([-35.5, -71.5], 4);
+const chileBounds = L.latLngBounds(L.latLng(-56,-76), L.latLng(-17,-65));
+
+const map = L.map('mapGeo', {
+  zoomControl: false,
+  scrollWheelZoom: true,
+  maxBounds: chileBounds.pad(0.1),
+  maxBoundsViscosity: 0.8,
+  minZoom: 4
+}).fitBounds(L.latLngBounds(L.latLng(-55.5,-75.5), L.latLng(-17.5,-66.5)));
+
+L.control.zoom({ position: 'bottomright' }).addTo(map);
 
 L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
   attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
   maxZoom: 16
 }).addTo(map);
 
-// Custom icon
-function makeIcon(isUrg) {
+// markers
+const markers = {};
+let activeItem = null;
+let activeMarker = null;
+
+function makeIcon(active) {
+  const size = active ? 22 : 14;
+  const bg = active ? 'var(--gold)' : '#8A2B36';
+  const border = active ? '3px solid #fff' : '2.5px solid rgba(255,255,255,.7)';
+  const shadow = active ? '0 0 12px rgba(201,169,110,.6),0 2px 8px rgba(0,0,0,.4)' : '0 2px 6px rgba(0,0,0,.35)';
   return L.divIcon({
     className: '',
-    html: `<div style="
-      width:18px;height:18px;border-radius:50%;
-      background:${isUrg ? '#8A2B36' : '#C4878C'};
-      border:2.5px solid white;
-      box-shadow:0 2px 6px rgba(0,0,0,.35);
-      cursor:pointer;
-    "></div>`,
-    iconSize: [18, 18],
-    iconAnchor: [9, 9],
-    popupAnchor: [0, -12]
+    html: `<div style="width:${size}px;height:${size}px;border-radius:50%;background:${bg};border:${border};box-shadow:${shadow};cursor:pointer;transition:all .3s;"></div>`,
+    iconSize: [size, size],
+    iconAnchor: [size/2, size/2],
+    popupAnchor: [0, -size/2 - 4]
   });
 }
 
-hospitales.forEach(h => {
-  const urgTag = h.u === 'SI' ? '<span class="tag tag-urg">Urgencia</span>' : '';
-  const popup = `
-    <div class="hosp-popup">
-      <h4>${h.n}</h4>
-      <p class="meta">${h.r} &mdash; ${h.c}</p>
-      <span class="tag tag-alta">Alta Complejidad</span> ${urgTag}
-    </div>
-  `;
-  L.marker([h.la, h.lo], { icon: makeIcon(h.u === 'SI') })
+hospitales.forEach((h, i) => {
+  const urgTag = h.u === 'SI' ? '<span class="ptag ptag-urg">Urgencia</span>' : '';
+  const popup = `<div class="popup-inner"><h4>${h.n}</h4><p class="pmeta">${h.r} &mdash; ${h.c}</p><div class="ptags"><span class="ptag ptag-alta">Alta Complejidad</span>${urgTag}</div></div>`;
+  const marker = L.marker([h.la, h.lo], { icon: makeIcon(false) })
     .addTo(map)
-    .bindPopup(popup, { maxWidth: 260 });
+    .bindPopup(popup, { maxWidth: 280, closeButton: true });
+  markers[i] = marker;
+  marker.on('click', () => selectHospital(i));
+});
+
+function selectHospital(idx) {
+  // reset previous
+  if (activeMarker !== null) markers[activeMarker].setIcon(makeIcon(false));
+  if (activeItem) activeItem.classList.remove('active');
+
+  activeMarker = idx;
+  markers[idx].setIcon(makeIcon(true));
+  markers[idx].openPopup();
+  map.flyTo([hospitales[idx].la, hospitales[idx].lo], 13, { duration: 1 });
+
+  const item = document.querySelector(`.hosp-item[data-idx="${idx}"]`);
+  if (item) {
+    item.classList.add('active');
+    item.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    activeItem = item;
+  }
+}
+
+// ═══ SIDEBAR LIST ═══
+function buildList(filter) {
+  const list = document.getElementById('hospList');
+  list.innerHTML = '';
+  const q = (filter || '').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  let count = 0;
+
+  regionOrder.forEach(region => {
+    const items = hospitales
+      .map((h, i) => ({ ...h, idx: i }))
+      .filter(h => h.r === region)
+      .filter(h => {
+        if (!q) return true;
+        const hay = (h.n + ' ' + h.r + ' ' + h.c).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+        return hay.includes(q);
+      });
+
+    if (items.length === 0) return;
+
+    const title = document.createElement('div');
+    title.className = 'region-group-title';
+    title.textContent = `${region} (${items.length})`;
+    list.appendChild(title);
+
+    items.forEach(h => {
+      count++;
+      const div = document.createElement('div');
+      div.className = 'hosp-item';
+      div.dataset.idx = h.idx;
+      const urgBadge = h.u === 'SI'
+        ? '<span class="hosp-badge hosp-badge-urg">Urgencia</span>'
+        : '<span class="hosp-badge hosp-badge-no-urg">Sin urg.</span>';
+      div.innerHTML = `
+        <span class="hosp-dot"></span>
+        <div class="hosp-info">
+          <div class="hosp-name" title="${h.n}">${h.n}</div>
+          <div class="hosp-meta">${h.c}</div>
+          <div class="hosp-badges"><span class="hosp-badge" style="background:var(--rose-dark);color:white;">Alta</span>${urgBadge}</div>
+        </div>`;
+      div.addEventListener('click', () => selectHospital(h.idx));
+      list.appendChild(div);
+    });
+  });
+
+  document.getElementById('searchCount').textContent = `${count} Hospital${count !== 1 ? 'es' : ''} encontrado${count !== 1 ? 's' : ''}`;
+}
+
+buildList('');
+
+// ═══ SEARCH ═══
+const searchInput = document.getElementById('searchInput');
+let debounce;
+searchInput.addEventListener('input', () => {
+  clearTimeout(debounce);
+  debounce = setTimeout(() => buildList(searchInput.value), 150);
 });
 
 // ═══ CAROUSEL DOTS ═══
 const carousel = document.getElementById('carousel');
 const slides = carousel.querySelectorAll('.slide');
-const navContainer = document.getElementById('carouselNav');
-
+const navC = document.getElementById('carouselNav');
 slides.forEach((_, i) => {
   const dot = document.createElement('button');
   dot.className = 'carousel-dot' + (i === 0 ? ' active' : '');
-  dot.onclick = () => { carousel.scrollTo({ left: slides[i].offsetLeft - 20, behavior: 'smooth' }); };
-  navContainer.appendChild(dot);
+  dot.onclick = () => carousel.scrollTo({ left: slides[i].offsetLeft - 20, behavior: 'smooth' });
+  navC.appendChild(dot);
 });
-
 carousel.addEventListener('scroll', () => {
-  const scrollLeft = carousel.scrollLeft;
-  const dots = navContainer.querySelectorAll('.carousel-dot');
-  let closest = 0;
-  slides.forEach((s, i) => {
-    if (Math.abs(s.offsetLeft - scrollLeft - 20) < Math.abs(slides[closest].offsetLeft - scrollLeft - 20)) closest = i;
-  });
-  dots.forEach((d, i) => d.classList.toggle('active', i === closest));
+  const sl = carousel.scrollLeft;
+  const dots = navC.querySelectorAll('.carousel-dot');
+  let cl = 0;
+  slides.forEach((s, i) => { if (Math.abs(s.offsetLeft - sl - 20) < Math.abs(slides[cl].offsetLeft - sl - 20)) cl = i; });
+  dots.forEach((d, i) => d.classList.toggle('active', i === cl));
 });
 </script>
 </body>
