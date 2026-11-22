@@ -110,6 +110,32 @@
     }
     .chart-card-caption strong{color:var(--text);font-weight:600}
 
+    /* native chart cards */
+    .chart-header{padding:1.2rem 1.4rem .4rem}
+    .chart-title{font-family:'DM Serif Display',serif;font-size:1rem;color:var(--dark);line-height:1.25;margin-bottom:.15rem}
+    .chart-sub{font-size:.72rem;color:var(--text-light);line-height:1.4}
+    .chart-body{padding:.5rem 1.4rem .8rem;flex:1;display:flex;align-items:center;justify-content:center}
+    .chart-src{padding:.45rem 1.4rem;font-size:.6rem;color:var(--text-light);border-top:1px solid #eee;background:#fafafa}
+
+    /* pie */
+    .pie-wrap{display:flex;align-items:center;gap:1.5rem;flex-wrap:wrap;justify-content:center;width:100%}
+    .pie-circle{width:190px;height:190px;border-radius:50%;box-shadow:0 2px 12px rgba(0,0,0,.08);flex-shrink:0}
+    .pie-legend{display:flex;flex-direction:column;gap:.3rem}
+    .pie-li{display:flex;align-items:center;gap:.35rem;font-size:.65rem;color:var(--text)}
+    .pie-dot{width:10px;height:10px;border-radius:2px;flex-shrink:0}
+    .pie-pct{font-family:'Space Mono',monospace;font-weight:600;color:var(--text-light);min-width:38px}
+    .pie-n{font-size:.55rem;color:var(--text-light)}
+
+    /* waffle */
+    .waffle-wrap{width:100%}
+    .waffle-grid{display:grid;grid-template-columns:repeat(10,1fr);gap:3px;max-width:310px;margin:0 auto .6rem}
+    .waffle-cell{aspect-ratio:1;border-radius:3px;cursor:default;transition:transform .15s}
+    .waffle-cell:hover{transform:scale(1.2);z-index:1}
+    .waffle-leg{display:flex;flex-wrap:wrap;gap:.3rem .7rem;justify-content:center}
+    .waffle-leg span{display:flex;align-items:center;gap:.2rem;font-size:.56rem;color:var(--text-light)}
+    .waffle-leg-dot{width:8px;height:8px;border-radius:2px;flex-shrink:0}
+    .waffle-note{text-align:center;font-size:.58rem;color:var(--text-light);margin-top:.4rem}
+
     /* ── MAP SECTION (PROTAGONIST) ── */
     .map-hero{background:var(--dark);padding:0;position:relative}
     .map-hero-header{text-align:center;padding:3.5rem 2rem 0}
@@ -286,6 +312,11 @@
       .map-stat-pill{padding:.3rem .6rem}
       .map-stat-pill .val{font-size:.9rem}
       .map-stat-pill .lbl{font-size:.5rem}
+      .pie-circle{width:150px;height:150px}
+      .pie-li{font-size:.6rem}
+      .waffle-grid{max-width:260px;gap:2px}
+      .chart-header{padding:1rem 1.1rem .3rem}
+      .chart-body{padding:.4rem 1.1rem .6rem}
     }
   </style>
 </head>
@@ -427,6 +458,22 @@
       <div class="chart-card">
         <div class="chart-img-wrap"><img src="img/grafico-especialidades.jpeg" alt="Medicina Interna domina la dotación de especialistas por región" loading="lazy"></div>
         <div class="chart-card-caption"><strong>Especialidad dominante.</strong> Medicina Interna lidera en casi todas las regiones, con más de 3.100 profesionales solo en la RM.</div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-header">
+          <h3 class="chart-title">Distribución de especialistas por región</h3>
+          <p class="chart-sub">La Región Metropolitana concentra más del 54% de todos los especialistas del país.</p>
+        </div>
+        <div class="chart-body" id="chartPie"></div>
+        <div class="chart-src">Fuente: RNPI / MINSAL (2026)</div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-header">
+          <h3 class="chart-title">Mapa de hospitales de alta complejidad</h3>
+          <p class="chart-sub">Cada cuadrado representa un centro de alta complejidad.</p>
+        </div>
+        <div class="chart-body" id="chartWaffle"></div>
+        <div class="chart-src">Fuente: DEIS / MINSAL (2026)</div>
       </div>
     </div>
   </div>
@@ -883,6 +930,72 @@ carousel.addEventListener('scroll', () => {
   slides.forEach((s, i) => { if (Math.abs(s.offsetLeft - sl - 20) < Math.abs(slides[cl].offsetLeft - sl - 20)) cl = i; });
   dots.forEach((d, i) => d.classList.toggle('active', i === cl));
 });
+
+// ═══ PIE CHART: Especialistas ═══
+(function(){
+  const el=document.getElementById('chartPie');if(!el)return;
+  const total=regionOrder.reduce((s,r)=>s+regionData[r].esp,0);
+  const slices=regionOrder.map(r=>({n:r,v:regionData[r].esp,p:regionData[r].esp/total*100})).sort((a,b)=>b.v-a.v);
+  const pal=['#8A2B36','#C4878C','#C9A96E','#5EADB0','#9B8EC4','#E8A87C','#7CB5A0','#c8c8c8'];
+  const top=slices.slice(0,7);
+  const ov=slices.slice(7).reduce((s,d)=>s+d.v,0);
+  const op=slices.slice(7).reduce((s,d)=>s+d.p,0);
+  top.push({n:'Otras regiones',v:ov,p:op});
+
+  let grad='',cum=0;
+  top.forEach((d,i)=>{
+    grad+=`${pal[i]} ${cum.toFixed(2)}% ${(cum+d.p).toFixed(2)}%`;
+    cum+=d.p;
+    if(i<top.length-1)grad+=',';
+  });
+
+  const short=n=>n==='Arica y Parinacota'?'Arica y Parina.':n;
+  el.innerHTML=`<div class="pie-wrap">
+    <div class="pie-circle" style="background:conic-gradient(${grad})"></div>
+    <div class="pie-legend">${top.map((d,i)=>`<div class="pie-li">
+      <span class="pie-dot" style="background:${pal[i]}"></span>
+      <span style="min-width:95px">${short(d.n)}</span>
+      <span class="pie-pct">${d.p.toFixed(1)}%</span>
+      <span class="pie-n">(${d.v.toLocaleString('es-CL')})</span>
+    </div>`).join('')}</div>
+  </div>`;
+})();
+
+// ═══ WAFFLE CHART: Hospitales AC ═══
+(function(){
+  const el=document.getElementById('chartWaffle');if(!el)return;
+  const counts={};
+  hospitales.forEach(h=>{counts[h.r]=(counts[h.r]||0)+1;});
+  const sorted=Object.entries(counts).sort((a,b)=>b[1]-a[1]);
+
+  const colors={
+    'Metropolitana':'#8A2B36','Valparaíso':'#C9A96E','Maule':'#7CB5A0',
+    'Biobío':'#9B8EC4','Antofagasta':'#E8A87C','Coquimbo':'#E8A87C',
+    'La Araucanía':'#E8A87C','Los Lagos':'#E8A87C',
+    'Ñuble':'#5EADB0',"O'Higgins":'#5EADB0','Magallanes':'#5EADB0'
+  };
+  const def='#d4d4d4';
+
+  let cells=[];
+  sorted.forEach(([r,c])=>{for(let i=0;i<c;i++)cells.push({r,c:colors[r]||def});});
+
+  // group legend
+  const g3=sorted.filter(([,c])=>c===3).map(([r])=>r);
+  const g2=sorted.filter(([,c])=>c===2).map(([r])=>r);
+  const g1=sorted.filter(([,c])=>c===1).map(([r])=>r);
+  const big=sorted.filter(([,c])=>c>=5);
+
+  let leg=big.map(([r,c])=>`<span><span class="waffle-leg-dot" style="background:${colors[r]}"></span>${r} (${c})</span>`).join('');
+  if(g3.length)leg+=`<span><span class="waffle-leg-dot" style="background:#E8A87C"></span>3 hosp. (${g3.length} reg.)</span>`;
+  if(g2.length)leg+=`<span><span class="waffle-leg-dot" style="background:#5EADB0"></span>2 hosp. (${g2.length} reg.)</span>`;
+  if(g1.length)leg+=`<span><span class="waffle-leg-dot" style="background:${def}"></span>1 hosp. (${g1.length} reg.)</span>`;
+
+  el.innerHTML=`<div class="waffle-wrap">
+    <div class="waffle-grid">${cells.map(c=>`<div class="waffle-cell" title="${c.r}" style="background:${c.c}"></div>`).join('')}</div>
+    <div class="waffle-leg">${leg}</div>
+    <p class="waffle-note">Cada cuadrado = 1 hospital de alta complejidad</p>
+  </div>`;
+})();
 </script>
 </body>
 </html>
