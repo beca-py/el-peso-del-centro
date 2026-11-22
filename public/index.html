@@ -92,27 +92,23 @@
     .charts-sec .sec-title{color:white}
     .charts-sec .sec-desc{color:rgba(255,255,255,.5)}
     .charts-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-top:2rem}
-    .chart-card{background:white;border-radius:12px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.15);display:flex;flex-direction:column}
-    .chart-header{padding:1.2rem 1.4rem .4rem}
-    .chart-title{font-family:'DM Serif Display',serif;font-size:1rem;color:var(--dark);line-height:1.25;margin-bottom:.15rem}
-    .chart-sub{font-size:.72rem;color:var(--text-light);line-height:1.4}
-    .chart-body{padding:.3rem 1.4rem .8rem;flex:1}
-    .chart-src{padding:.45rem 1.4rem;font-size:.6rem;color:var(--text-light);border-top:1px solid #eee;background:#fafafa}
-    .hbar-row{display:flex;align-items:center;gap:.3rem;margin-bottom:.2rem}
-    .hbar-label{font-size:.62rem;color:var(--text);width:90px;text-align:right;flex-shrink:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.1}
-    .hbar-track{flex:1;height:15px;background:#f0eeeb;border-radius:3px;overflow:hidden}
-    .hbar-fill{height:100%;border-radius:3px;min-width:2px}
-    .hbar-val{font-size:.62rem;font-weight:600;color:var(--text);min-width:28px;font-family:'Space Mono',monospace}
-    .hbar-row.hl .hbar-label{color:var(--rose-dark);font-weight:700}
-    .hbar-row.hl .hbar-fill{background:var(--rose-dark)!important}
-    .hbar-row.hl .hbar-val{color:var(--rose-dark)}
-    .hbar-track.stk{display:flex;gap:0}
-    .hbar-seg{height:100%}
-    .chart-legend{display:flex;gap:.8rem;padding:.2rem 0 .4rem;flex-wrap:wrap}
-    .chart-legend i{display:flex;align-items:center;gap:.25rem;font-size:.58rem;color:var(--text-light);font-style:normal}
-    .cleg{width:8px;height:8px;border-radius:2px;flex-shrink:0}
-    .chart-ref{font-size:.56rem;color:var(--rose-dark);display:flex;align-items:center;gap:.2rem;margin-top:.15rem}
-    .chart-ref::before{content:'';width:12px;border-top:2px dashed var(--rose-dark)}
+    .chart-card{
+      background:white;border-radius:12px;overflow:hidden;
+      box-shadow:0 4px 20px rgba(0,0,0,.15);transition:transform .3s;
+      display:flex;flex-direction:column;
+    }
+    .chart-card:hover{transform:translateY(-4px)}
+    .chart-img-wrap{
+      padding:1.2rem 1.2rem .8rem;background:#f9f9fb;
+      display:flex;align-items:center;justify-content:center;flex:1;
+    }
+    .chart-card img{width:100%;height:auto;display:block;border-radius:4px}
+    .chart-card-caption{
+      padding:.8rem 1.2rem;background:white;
+      font-size:.78rem;color:var(--text-light);line-height:1.5;
+      border-top:2px solid var(--rose-dark);
+    }
+    .chart-card-caption strong{color:var(--text);font-weight:600}
 
     /* ── MAP SECTION (PROTAGONIST) ── */
     .map-hero{background:var(--dark);padding:0;position:relative}
@@ -290,13 +286,6 @@
       .map-stat-pill{padding:.3rem .6rem}
       .map-stat-pill .val{font-size:.9rem}
       .map-stat-pill .lbl{font-size:.5rem}
-      .chart-title{font-size:.88rem}
-      .chart-header{padding:1rem 1.1rem .3rem}
-      .chart-body{padding:.2rem 1.1rem .6rem}
-      .chart-src{padding:.4rem 1.1rem}
-      .hbar-label{width:75px;font-size:.58rem}
-      .hbar-val{font-size:.58rem;min-width:22px}
-      .hbar-track{height:13px}
     }
   </style>
 </head>
@@ -424,52 +413,20 @@
     <p class="sec-desc">Resultados clave del estudio de establecimientos y especialistas a nivel regional.</p>
     <div class="charts-grid">
       <div class="chart-card">
-        <div class="chart-header">
-          <h3 class="chart-title">Tasa de Centros de Alta Complejidad por cada 100k Hab.</h3>
-          <p class="chart-sub">Magallanes lidera el indicador mientras la RM (0,49) se sitúa al centro de la tabla.</p>
-        </div>
-        <div class="chart-body" id="chart1"></div>
-        <div class="chart-src">Fuente: DEIS / MINSAL e INE (2026). Línea indica promedio RM.</div>
+        <div class="chart-img-wrap"><img src="img/grafico-tasa-100k.jpeg" alt="Tasa de centros de alta complejidad por cada 100k habitantes" loading="lazy"></div>
+        <div class="chart-card-caption"><strong>Tasa per cápita.</strong> Magallanes lidera con 1,20 centros por 100k hab. La RM (0,49) queda al centro de la tabla nacional.</div>
       </div>
       <div class="chart-card">
-        <div class="chart-header">
-          <h3 class="chart-title">Distribución por nivel de complejidad</h3>
-          <p class="chart-sub">9 de cada 10 establecimientos son de baja o mediana complejidad. Solo el 2,4% alcanza la alta.</p>
-        </div>
-        <div class="chart-body" id="chart2"></div>
-        <div class="chart-src">Fuente: DEIS - MINSAL, agosto 2026</div>
+        <div class="chart-img-wrap"><img src="img/grafico-complejidad.jpeg" alt="Distribución de establecimientos por nivel de complejidad" loading="lazy"></div>
+        <div class="chart-card-caption"><strong>Nivel de complejidad.</strong> 9 de cada 10 establecimientos son de baja o mediana complejidad. Solo el 2,4% alcanza la alta complejidad.</div>
       </div>
       <div class="chart-card">
-        <div class="chart-header">
-          <h3 class="chart-title">La RM lidera la red asistencial en alta complejidad</h3>
-          <p class="chart-sub">Porcentaje de establecimientos de alta complejidad por región.</p>
-        </div>
-        <div class="chart-body" id="chart3"></div>
-        <div class="chart-src">Fuente: DEIS - MINSAL 2026</div>
+        <div class="chart-img-wrap"><img src="img/grafico-rm-lidera.jpeg" alt="La Región Metropolitana lidera la red asistencial en alta complejidad" loading="lazy"></div>
+        <div class="chart-card-caption"><strong>Concentración en la RM.</strong> La Región Metropolitana concentra casi el 6% de establecimientos de alta complejidad, liderando la red asistencial.</div>
       </div>
       <div class="chart-card">
-        <div class="chart-header">
-          <h3 class="chart-title">Especialidad con mayor dotación por región</h3>
-          <p class="chart-sub">Medicina Interna domina en casi todo el país, con más de 3.100 profesionales solo en la RM.</p>
-        </div>
-        <div class="chart-body" id="chart4"></div>
-        <div class="chart-src">Fuente: RNPI / MINSAL</div>
-      </div>
-      <div class="chart-card">
-        <div class="chart-header">
-          <h3 class="chart-title">Especialistas por cada 100.000 habitantes</h3>
-          <p class="chart-sub">La RM concentra 390 esp./100k hab., casi 6 veces más que Tarapacá (66).</p>
-        </div>
-        <div class="chart-body" id="chart5"></div>
-        <div class="chart-src">Fuente: RNPI / MINSAL e INE (2026)</div>
-      </div>
-      <div class="chart-card">
-        <div class="chart-header">
-          <h3 class="chart-title">Hospitales de alta complejidad por región</h3>
-          <p class="chart-sub">35 de los 80 centros se concentran solo en la Región Metropolitana.</p>
-        </div>
-        <div class="chart-body" id="chart6"></div>
-        <div class="chart-src">Fuente: DEIS / MINSAL (2026)</div>
+        <div class="chart-img-wrap"><img src="img/grafico-especialidades.jpeg" alt="Medicina Interna domina la dotación de especialistas por región" loading="lazy"></div>
+        <div class="chart-card-caption"><strong>Especialidad dominante.</strong> Medicina Interna lidera en casi todas las regiones, con más de 3.100 profesionales solo en la RM.</div>
       </div>
     </div>
   </div>
@@ -926,98 +883,6 @@ carousel.addEventListener('scroll', () => {
   slides.forEach((s, i) => { if (Math.abs(s.offsetLeft - sl - 20) < Math.abs(slides[cl].offsetLeft - sl - 20)) cl = i; });
   dots.forEach((d, i) => d.classList.toggle('active', i === cl));
 });
-
-// ═══ CHARTS (native) ═══
-(function(){
-const R='#C4878C',RD='#8A2B36',G='#C9A96E',TL='#5EADB0',PU='#9B8EC4';
-
-function bars(id,data,color,max){
-  const el=document.getElementById(id);if(!el)return;
-  const m=max||Math.max(...data.map(d=>d[1]));
-  el.innerHTML=data.map(d=>{
-    const w=Math.max(d[1]/m*100,.5).toFixed(1);
-    const h=d[2]?' hl':'';
-    const c=d[4]||(d[2]?RD:color);
-    const v=d[3]!=null?d[3]:d[1];
-    return `<div class="hbar-row${h}"><span class="hbar-label">${d[0]}</span><div class="hbar-track"><div class="hbar-fill" style="width:${w}%;background:${c}"></div></div><span class="hbar-val">${v}</span></div>`;
-  }).join('');
-}
-
-function stack(id,data,colors,labels){
-  const el=document.getElementById(id);if(!el)return;
-  let h='<div class="chart-legend">';
-  labels.forEach((l,i)=>{h+=`<i><span class="cleg" style="background:${colors[i]}"></span>${l}</i>`;});
-  h+='</div>';
-  data.forEach(d=>{
-    h+=`<div class="hbar-row"><span class="hbar-label">${d[0]}</span><div class="hbar-track stk">`;
-    d[1].forEach((v,i)=>{h+=`<div class="hbar-seg" style="width:${v}%;background:${colors[i]}"></div>`;});
-    h+='</div></div>';
-  });
-  el.innerHTML=h;
-}
-
-// 1 — Tasa per cápita
-bars('chart1',[
-['Magallanes',1.20,0,'1.20'],['Aysén',0.97,0,'0.97'],['Maule',0.67,0,'0.67'],
-['Valparaíso',0.55,0,'0.55'],['Metropolitana',0.49,1,'0.49'],['Antofagasta',0.49,0,'0.49'],
-['Arica y Parina.',0.44,0,'0.44'],['Ñuble',0.41,0,'0.41'],['Coquimbo',0.40,0,'0.40'],
-['Biobío',0.39,0,'0.39'],['Los Lagos',0.36,0,'0.36'],['Atacama',0.35,0,'0.35'],
-['La Araucanía',0.31,0,'0.31'],['Tarapacá',0.30,0,'0.30'],['Los Ríos',0.26,0,'0.26'],
-["O'Higgins",0.22,0,'0.22']
-],R,1.3);
-
-// 2 — Distribución por complejidad
-stack('chart2',[
-['Arica y Parina.',[78,17,5]],['Tarapacá',[75,23,2]],['Antofagasta',[88,9,3]],
-['Atacama',[88,10,2]],['Coquimbo',[85,11,4]],['Valparaíso',[82,10,8]],
-['Metropolitana',[78,16,6]],["O'Higgins",[92,6,2]],['Maule',[86,9,5]],
-['Ñuble',[90,7,3]],['Biobío',[86,10,4]],['La Araucanía',[88,9,3]],
-['Los Ríos',[90,8,2]],['Los Lagos',[88,9,3]],['Aysén',[90,7,3]],
-['Magallanes',[87,7,6]]
-],[TL,PU,RD],['Baja Complejidad','Mediana Complejidad','Alta Complejidad']);
-
-// 3 — RM lidera (top 8)
-bars('chart3',[
-['Metropolitana',5.7,1,'5.7%'],['Magallanes',4.5,0,'4.5%'],['Antofagasta',4.0,0,'4.0%'],
-['Valparaíso',3.3,0,'3.3%'],['Arica y Parina.',2.2,0,'2.2%'],['Maule',2.1,0,'2.1%'],
-['Aysén',1.8,0,'1.8%'],['Biobío',1.7,0,'1.7%']
-],R,6.5);
-
-// 4 — Especialidad dominante por región
-(function(){
-  const el=document.getElementById('chart4');if(!el)return;
-  const d=[
-    ['Metropolitana',3139,1],['Valparaíso',585],["O'Higgins",463],['Biobío',427],
-    ['Los Lagos',264],['La Araucanía',253],['Maule',232],['Coquimbo',166],
-    ['Los Ríos',137],['Antofagasta',133,0,null,G],['Ñuble',128],['Atacama',54],
-    ['Magallanes',49,0,null,G],['Arica y Parina.',37],['Tarapacá',28],['Aysén',19]
-  ];
-  const mx=3139;
-  let h='<div class="chart-legend"><i><span class="cleg" style="background:'+R+'"></span>Medicina Interna</i><i><span class="cleg" style="background:'+G+'"></span>Pediatría</i></div>';
-  h+=d.map(r=>{
-    const w=Math.max(r[1]/mx*100,.5).toFixed(1);
-    const hl=r[2]?' hl':'';
-    const c=r[4]||(r[2]?RD:R);
-    return `<div class="hbar-row${hl}"><span class="hbar-label">${r[0]}</span><div class="hbar-track"><div class="hbar-fill" style="width:${w}%;background:${c}"></div></div><span class="hbar-val">${r[1].toLocaleString('es-CL')}</span></div>`;
-  }).join('');
-  el.innerHTML=h;
-})();
-
-// 5 — Especialistas por 100k (from regionData)
-const c5=regionOrder.map(r=>{
-  const l=r==='Arica y Parinacota'?'Arica y Parina.':r;
-  return [l,regionData[r].tasa,r==='Metropolitana'?1:0,regionData[r].tasa.toFixed(1)];
-}).sort((a,b)=>b[1]-a[1]);
-bars('chart5',c5,G,420);
-
-// 6 — Hospitales por región (from hospitales)
-const c6={};hospitales.forEach(h=>{c6[h.r]=(c6[h.r]||0)+1;});
-bars('chart6',Object.entries(c6).sort((a,b)=>b[1]-a[1]).map(([r,c])=>{
-  const l=r==='Arica y Parinacota'?'Arica y Parina.':r;
-  return [l,c,r==='Metropolitana'?1:0];
-}),RD);
-
-})();
 </script>
 </body>
 </html>
