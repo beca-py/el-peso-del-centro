@@ -95,18 +95,22 @@
     .map-layout{display:grid;grid-template-columns:380px 1fr;height:75vh;min-height:550px;max-height:800px;margin-top:2rem}
     .map-sidebar{background:#111827;display:flex;flex-direction:column;overflow:hidden;border-right:1px solid rgba(255,255,255,.06)}
 
-    /* region filter */
-    .region-filter{padding:.6rem 1.2rem;border-bottom:1px solid rgba(255,255,255,.06);display:flex;align-items:center;gap:.5rem}
-    .region-filter select{
-      flex:1;padding:.45rem .6rem;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);
-      border-radius:6px;color:white;font-size:.78rem;font-family:'Inter',sans-serif;outline:none;cursor:pointer;
-      appearance:none;-webkit-appearance:none;
-      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='rgba(255,255,255,.4)' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10z'/%3E%3C/svg%3E");
-      background-repeat:no-repeat;background-position:right .6rem center;padding-right:1.8rem;
+    /* region top bar */
+    .region-bar{
+      display:flex;gap:.4rem;padding:.55rem 1rem;overflow-x:auto;
+      background:rgba(17,24,39,.95);border-bottom:1px solid rgba(255,255,255,.06);
+      -ms-overflow-style:none;scrollbar-width:none;
     }
-    .region-filter select:focus{border-color:var(--gold)}
-    .region-filter select option{background:#1a1a2e;color:white}
-    .region-filter label{font-size:.65rem;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.06em;white-space:nowrap}
+    .region-bar::-webkit-scrollbar{display:none}
+    .region-tab{
+      flex-shrink:0;padding:.35rem .7rem;border-radius:6px;border:1px solid rgba(255,255,255,.08);
+      background:transparent;color:rgba(255,255,255,.5);font-size:.68rem;font-family:'Inter',sans-serif;
+      font-weight:500;cursor:pointer;transition:all .25s;white-space:nowrap;letter-spacing:.01em;
+    }
+    .region-tab:hover{color:rgba(255,255,255,.8);border-color:rgba(255,255,255,.18);background:rgba(255,255,255,.04)}
+    .region-tab.active{background:var(--rose-dark);color:white;border-color:var(--rose-dark)}
+    .region-tab.tab-all{border-color:rgba(201,169,110,.25);color:var(--gold)}
+    .region-tab.tab-all.active{background:var(--gold);color:var(--dark);border-color:var(--gold)}
 
     /* regional analysis panel */
     .region-panel{display:none;padding:1rem 1.2rem;border-bottom:1px solid rgba(255,255,255,.06);background:rgba(201,169,110,.05)}
@@ -204,9 +208,10 @@
     .fullscreen-btn svg{width:18px;height:18px}
 
     /* fullscreen mode */
-    .map-hero.fullscreen{position:fixed;inset:0;z-index:2000;padding:0}
+    .map-hero.fullscreen{position:fixed;inset:0;z-index:2000;padding:0;display:flex;flex-direction:column}
     .map-hero.fullscreen .map-hero-header{display:none}
-    .map-hero.fullscreen .map-layout{height:100vh;max-height:none;margin-top:0}
+    .map-hero.fullscreen .region-bar{flex-shrink:0}
+    .map-hero.fullscreen .map-layout{flex:1;height:auto;max-height:none;margin-top:0}
 
     /* ── IMPLICATIONS ── */
     .impl-sec{background:var(--rose-light)}
@@ -239,6 +244,7 @@
       .findings-grid{grid-template-columns:1fr}
       .team-grid{grid-template-columns:1fr}
       .map-stats-overlay{flex-wrap:wrap}
+      .region-tab{font-size:.62rem;padding:.3rem .55rem}
     }
     @media(max-width:700px){
       nav{padding:0 1rem}
@@ -371,15 +377,10 @@
     <h2 class="sec-title">81 centros de alta complejidad en Chile</h2>
     <p class="sec-desc">Busca o haz clic en un Hospital para ver su información. Explora cómo se distribuyen a lo largo del territorio.</p>
   </div>
+  <div class="region-bar" id="regionBar"></div>
   <div class="map-layout">
     <!-- SIDEBAR -->
     <div class="map-sidebar">
-      <div class="region-filter">
-        <label for="regionSelect">Región</label>
-        <select id="regionSelect">
-          <option value="">Todas las regiones</option>
-        </select>
-      </div>
       <div class="region-panel" id="regionPanel"></div>
       <div class="search-wrap">
         <div class="search-box">
@@ -697,17 +698,44 @@ function buildList(filter, regionFilter) {
 
 buildList('', '');
 
-// ═══ REGION FILTER ═══
-const regionSelect = document.getElementById('regionSelect');
+// ═══ REGION TAB BAR ═══
+const regionBar = document.getElementById('regionBar');
 const regionPanel = document.getElementById('regionPanel');
+let activeRegion = '';
 
-// Populate region select
+// Build tabs
+const allTab = document.createElement('button');
+allTab.className = 'region-tab tab-all active';
+allTab.textContent = 'Todas';
+allTab.dataset.region = '';
+regionBar.appendChild(allTab);
+
 regionOrder.forEach(r => {
-  const opt = document.createElement('option');
-  opt.value = r;
-  opt.textContent = r;
-  regionSelect.appendChild(opt);
+  const tab = document.createElement('button');
+  tab.className = 'region-tab';
+  tab.textContent = r;
+  tab.dataset.region = r;
+  regionBar.appendChild(tab);
 });
+
+function selectRegion(region) {
+  activeRegion = region;
+  regionBar.querySelectorAll('.region-tab').forEach(t => {
+    t.classList.toggle('active', t.dataset.region === region);
+  });
+  showRegionPanel(region);
+  buildList(searchInput.value, region);
+
+  if (region) {
+    const rh = hospitales.filter(h => h.r === region);
+    if (rh.length > 0) {
+      const bounds = L.latLngBounds(rh.map(h => [h.la, h.lo]));
+      map.flyToBounds(bounds.pad(0.3), { duration: 1 });
+    }
+  } else {
+    map.flyToBounds(L.latLngBounds(L.latLng(-55.5,-75.5), L.latLng(-17.5,-66.5)), { duration: 1 });
+  }
+}
 
 function showRegionPanel(region) {
   if (!region) {
@@ -739,21 +767,12 @@ function showRegionPanel(region) {
   regionPanel.classList.add('visible');
 }
 
-regionSelect.addEventListener('change', () => {
-  const region = regionSelect.value;
-  showRegionPanel(region);
-  buildList(searchInput.value, region);
-
-  // Zoom to region hospitals
-  if (region) {
-    const rh = hospitales.filter(h => h.r === region);
-    if (rh.length > 0) {
-      const bounds = L.latLngBounds(rh.map(h => [h.la, h.lo]));
-      map.flyToBounds(bounds.pad(0.3), { duration: 1 });
-    }
-  } else {
-    map.flyToBounds(L.latLngBounds(L.latLng(-55.5,-75.5), L.latLng(-17.5,-66.5)), { duration: 1 });
-  }
+regionBar.addEventListener('click', (e) => {
+  const tab = e.target.closest('.region-tab');
+  if (!tab) return;
+  selectRegion(tab.dataset.region);
+  // scroll active tab into view
+  tab.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
 });
 
 // ═══ SEARCH ═══
@@ -761,7 +780,7 @@ const searchInput = document.getElementById('searchInput');
 let debounce;
 searchInput.addEventListener('input', () => {
   clearTimeout(debounce);
-  debounce = setTimeout(() => buildList(searchInput.value, regionSelect.value), 150);
+  debounce = setTimeout(() => buildList(searchInput.value, activeRegion), 150);
 });
 
 // ═══ FULLSCREEN TOGGLE ═══
