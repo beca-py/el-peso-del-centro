@@ -148,13 +148,36 @@
 
     /* popups */
     .leaflet-popup-content-wrapper{border-radius:12px;box-shadow:0 8px 30px rgba(0,0,0,.25);border:1px solid rgba(0,0,0,.05)}
-    .leaflet-popup-content{margin:.8rem 1rem;font-family:'Inter',sans-serif}
+    .leaflet-popup-content{margin:.8rem 1rem;font-family:'Inter',sans-serif;min-width:220px}
     .popup-inner h4{font-size:.9rem;color:var(--dark);margin-bottom:.25rem;line-height:1.3;font-weight:600}
-    .popup-inner .pmeta{font-size:.78rem;color:var(--text-light);margin-bottom:.4rem}
+    .popup-inner .pmeta{font-size:.78rem;color:var(--text-light);margin-bottom:.5rem}
+    .popup-inner .pdetails{display:flex;flex-direction:column;gap:.35rem;margin-bottom:.5rem;padding:.5rem 0;border-top:1px solid #eee;border-bottom:1px solid #eee}
+    .popup-inner .prow{display:flex;align-items:flex-start;gap:.4rem;font-size:.75rem;color:var(--text);line-height:1.4}
+    .popup-inner .prow svg{width:13px;height:13px;flex-shrink:0;margin-top:1px;color:var(--text-light)}
+    .popup-inner .prow span{flex:1}
     .popup-inner .ptags{display:flex;gap:.3rem;flex-wrap:wrap}
     .popup-inner .ptag{display:inline-block;padding:2px 8px;border-radius:4px;font-size:.65rem;font-weight:700}
     .popup-inner .ptag-alta{background:var(--rose-dark);color:white}
     .popup-inner .ptag-urg{background:#E8F5E9;color:#2E7D32}
+    .popup-inner .ptag-niv{background:#E3F2FD;color:#1565C0}
+    .popup-inner .ptag-cert{background:#FFF3E0;color:#E65100}
+
+    /* fullscreen toggle */
+    .fullscreen-btn{
+      position:absolute;top:1rem;right:1rem;z-index:500;
+      background:rgba(26,26,46,.88);backdrop-filter:blur(8px);
+      border:1px solid rgba(201,169,110,.2);border-radius:8px;
+      color:rgba(255,255,255,.7);cursor:pointer;padding:.5rem;
+      display:flex;align-items:center;justify-content:center;
+      transition:all .3s;width:36px;height:36px;
+    }
+    .fullscreen-btn:hover{background:rgba(26,26,46,.95);color:var(--gold);border-color:var(--gold)}
+    .fullscreen-btn svg{width:18px;height:18px}
+
+    /* fullscreen mode */
+    .map-hero.fullscreen{position:fixed;inset:0;z-index:2000;padding:0}
+    .map-hero.fullscreen .map-hero-header{display:none}
+    .map-hero.fullscreen .map-layout{height:100vh;max-height:none;margin-top:0}
 
     /* ── IMPLICATIONS ── */
     .impl-sec{background:var(--rose-light)}
@@ -316,7 +339,6 @@
 <!-- ═══════════ MAP SECTION (PROTAGONIST) ═══════════ -->
 <section class="map-hero" id="mapa-geo">
   <div class="map-hero-header">
-    <span class="sec-label">Mapa interactivo</span>
     <h2 class="sec-title">81 centros de alta complejidad en Chile</h2>
     <p class="sec-desc">Busca o haz clic en un Hospital para ver su información. Explora cómo se distribuyen a lo largo del territorio.</p>
   </div>
@@ -339,6 +361,10 @@
         <div class="map-stat-pill"><span class="val">81</span><span class="lbl">Alta Comp.</span></div>
         <div class="map-stat-pill"><span class="val">2,4%</span><span class="lbl">Del total</span></div>
       </div>
+      <button class="fullscreen-btn" id="fullscreenBtn" title="Pantalla completa">
+        <svg id="fsIconExpand" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 00-2 2v3m18 0V5a2 2 0 00-2-2h-3m0 18h3a2 2 0 002-2v-3M3 16v3a2 2 0 002 2h3"/></svg>
+        <svg id="fsIconCollapse" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none"><path d="M4 14h6v6m10-10h-6V4m0 6l7-7M3 21l7-7"/></svg>
+      </button>
       <div id="mapGeo"></div>
     </div>
   </div>
@@ -398,101 +424,101 @@
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-// ═══ DATA ═══
+// ═══ DATA (enriched from DEIS/MINSAL CSV) ═══
 const hospitales = [
-{"n":"Hospital Regional Dr. Juan Noé Crevani (Arica)","la":-18.482478,"lo":-70.312948,"r":"Arica y Parinacota","c":"Arica","u":"SI"},
-{"n":"Hospital Dr. Ernesto Torres Galdames (Iquique)","la":-20.214354,"lo":-70.138931,"r":"Tarapacá","c":"Iquique","u":"SI"},
-{"n":"Centro Oncológico del Norte (CON)","la":-23.569147,"lo":-70.379095,"r":"Antofagasta","c":"Antofagasta","u":"SI"},
-{"n":"Hospital Dr. Carlos Cisternas (Calama)","la":-22.445201,"lo":-68.918257,"r":"Antofagasta","c":"Calama","u":"SI"},
-{"n":"Hospital Dr. Leonardo Guzmán (Antofagasta)","la":-23.616852,"lo":-70.385924,"r":"Antofagasta","c":"Antofagasta","u":"SI"},
-{"n":"Hospital San José del Carmen (Copiapó)","la":-27.373352,"lo":-70.322127,"r":"Atacama","c":"Copiapó","u":"SI"},
-{"n":"Hospital Dr. Antonio Tirado Lanas de Ovalle","la":-30.599614,"lo":-71.200031,"r":"Coquimbo","c":"Ovalle","u":"SI"},
-{"n":"Hospital San Juan de Dios (La Serena)","la":-29.908191,"lo":-71.249732,"r":"Coquimbo","c":"La Serena","u":"SI"},
-{"n":"Hospital San Pablo (Coquimbo)","la":-29.968488,"lo":-71.337017,"r":"Coquimbo","c":"Coquimbo","u":"SI"},
-{"n":"Centro de Sangre y Tejidos IV y V Región","la":-33.052658,"lo":-71.609776,"r":"Valparaíso","c":"Valparaíso","u":"NO"},
-{"n":"Hospital Biprovincial Quillota Petorca","la":-32.901916,"lo":-71.252111,"r":"Valparaíso","c":"Quillota","u":"SI"},
-{"n":"Hospital Carlos Van Buren (Valparaíso)","la":-33.050258,"lo":-71.611098,"r":"Valparaíso","c":"Valparaíso","u":"SI"},
-{"n":"Hospital Claudio Vicuña (San Antonio)","la":-33.588809,"lo":-71.608623,"r":"Valparaíso","c":"San Antonio","u":"SI"},
-{"n":"Hospital Dr. Eduardo Pereira Ramírez (Valparaíso)","la":-33.05679,"lo":-71.58962,"r":"Valparaíso","c":"Valparaíso","u":"NO"},
-{"n":"Hospital Dr. Gustavo Fricke (Viña del Mar)","la":-33.0294,"lo":-71.541725,"r":"Valparaíso","c":"Viña del Mar","u":"SI"},
-{"n":"Hospital Naval Almirante Neff","la":-32.998382,"lo":-71.54382,"r":"Valparaíso","c":"Viña del Mar","u":"SI"},
-{"n":"Hospital San Camilo de San Felipe","la":-32.74977,"lo":-70.708992,"r":"Valparaíso","c":"San Felipe","u":"SI"},
-{"n":"Hospital San Juan de Dios (Los Andes)","la":-32.829664,"lo":-70.59643,"r":"Valparaíso","c":"Los Andes","u":"SI"},
-{"n":"Hospital de Quilpué","la":-33.051961,"lo":-71.433933,"r":"Valparaíso","c":"Quilpué","u":"SI"},
-{"n":"Centro de Sangre y Tejidos Metropolitano","la":-33.41889,"lo":-70.605024,"r":"Metropolitana","c":"Providencia","u":"NO"},
-{"n":"Centro Metropolitano de Atención Prehospitalaria (SAMU)","la":-33.437666,"lo":-70.644218,"r":"Metropolitana","c":"Santiago","u":"SI"},
-{"n":"Centro de Imagenología Mamaria Metropolitano","la":-33.484821,"lo":-70.644294,"r":"Metropolitana","c":"San Miguel","u":"NO"},
-{"n":"Complejo Hospitalario Dr. Sótero del Río (Puente Alto)","la":-33.577251,"lo":-70.581781,"r":"Metropolitana","c":"Puente Alto","u":"SI"},
-{"n":"Complejo Hospitalario San José (Independencia)","la":-33.416586,"lo":-70.653318,"r":"Metropolitana","c":"Independencia","u":"SI"},
-{"n":"Hospital Félix Bulnes Cerda","la":-33.423625,"lo":-70.741664,"r":"Metropolitana","c":"Cerro Navia","u":"SI"},
-{"n":"Hospital Barros Luco Trudeau (San Miguel)","la":-33.485147,"lo":-70.644439,"r":"Metropolitana","c":"San Miguel","u":"SI"},
-{"n":"Hospital Carabineros","la":-33.450658,"lo":-70.608463,"r":"Metropolitana","c":"Ñuñoa","u":"SI"},
-{"n":"Hospital Clínico Metropolitano El Carmen (Maipú)","la":-33.508212,"lo":-70.774248,"r":"Metropolitana","c":"Maipú","u":"SI"},
-{"n":"Hospital Clínico Metropolitano La Florida","la":-33.514161,"lo":-70.599148,"r":"Metropolitana","c":"La Florida","u":"SI"},
-{"n":"Hospital Clínico San Borja Arriarán","la":-33.460498,"lo":-70.64232,"r":"Metropolitana","c":"Santiago","u":"SI"},
-{"n":"Hospital Clínico Universidad de Chile","la":-33.420057,"lo":-70.653116,"r":"Metropolitana","c":"Independencia","u":"SI"},
-{"n":"Hospital Clínico de Niños Dr. Roberto del Río","la":-33.415335,"lo":-70.655086,"r":"Metropolitana","c":"Independencia","u":"SI"},
-{"n":"Hospital Del Salvador de Santiago","la":-33.43664,"lo":-70.624493,"r":"Metropolitana","c":"Providencia","u":"SI"},
-{"n":"Hospital Dipreca Teniente Hernán Merino","la":-33.417683,"lo":-70.528194,"r":"Metropolitana","c":"Las Condes","u":"SI"},
-{"n":"Hospital Dr. Exequiel González Cortés (San Miguel)","la":-33.484761,"lo":-70.648129,"r":"Metropolitana","c":"San Miguel","u":"SI"},
-{"n":"Hospital Dr. Luis Tisné B. (Peñalolén)","la":-33.501328,"lo":-70.579408,"r":"Metropolitana","c":"Peñalolén","u":"SI"},
-{"n":"Hospital El Pino (San Bernardo)","la":-33.58435,"lo":-70.676793,"r":"Metropolitana","c":"San Bernardo","u":"SI"},
-{"n":"Hospital FACH","la":-33.395327,"lo":-70.548074,"r":"Metropolitana","c":"Las Condes","u":"SI"},
-{"n":"Hospital Metropolitano (Ex Militar)","la":-33.418942,"lo":-70.605168,"r":"Metropolitana","c":"Providencia","u":"NO"},
-{"n":"Hospital Militar de Santiago","la":-33.450493,"lo":-70.538184,"r":"Metropolitana","c":"La Reina","u":"SI"},
-{"n":"Hospital Padre Alberto Hurtado (San Ramón)","la":-33.5525,"lo":-70.635024,"r":"Metropolitana","c":"San Ramón","u":"SI"},
-{"n":"Hospital Parroquial de San Bernardo","la":-33.592835,"lo":-70.697393,"r":"Metropolitana","c":"San Bernardo","u":"SI"},
-{"n":"Hospital San José (Melipilla)","la":-33.69526,"lo":-71.214668,"r":"Metropolitana","c":"Melipilla","u":"SI"},
-{"n":"Hospital San Juan de Dios (Santiago)","la":-33.442394,"lo":-70.679188,"r":"Metropolitana","c":"Santiago","u":"SI"},
-{"n":"Hospital de Niños Dr. Luis Calvo Mackenna","la":-33.429848,"lo":-70.614527,"r":"Metropolitana","c":"Providencia","u":"SI"},
-{"n":"Hospital de Urgencia Asistencia Pública Dr. Alejandro del Río","la":-33.444004,"lo":-70.637955,"r":"Metropolitana","c":"Santiago","u":"SI"},
-{"n":"Instituto Nacional Geriátrico Pdte. Eduardo Frei Montalva","la":-33.434825,"lo":-70.622227,"r":"Metropolitana","c":"Providencia","u":"NO"},
-{"n":"Instituto Nacional de Enfermedades Respiratorias y Cirugía Torácica","la":-33.437988,"lo":-70.621882,"r":"Metropolitana","c":"Providencia","u":"NO"},
-{"n":"Instituto Nacional de Rehabilitación Infantil Pdte. Pedro Aguirre Cerda","la":-33.460454,"lo":-70.569892,"r":"Metropolitana","c":"Peñalolén","u":"NO"},
-{"n":"Instituto Nacional del Cáncer Dr. Caupolicán Pardo Correa","la":-33.418128,"lo":-70.652105,"r":"Metropolitana","c":"Independencia","u":"NO"},
-{"n":"Instituto Psiquiátrico Dr. José Horwitz Barak","la":-33.422402,"lo":-70.650537,"r":"Metropolitana","c":"Recoleta","u":"NO"},
-{"n":"Instituto Traumatológico Dr. Teodoro Gebauer","la":-33.434891,"lo":-70.658236,"r":"Metropolitana","c":"Santiago","u":"SI"},
-{"n":"Instituto de Neurocirugía Dr. Alfonso Asenjo","la":-33.436888,"lo":-70.622448,"r":"Metropolitana","c":"Providencia","u":"SI"},
-{"n":"Hospital Dr. Franco Ravera Zunino","la":-34.155358,"lo":-70.766723,"r":"O'Higgins","c":"Rancagua","u":"SI"},
-{"n":"Hospital San Juan de Dios de San Fernando","la":-34.575908,"lo":-70.992563,"r":"O'Higgins","c":"San Fernando","u":"SI"},
-{"n":"CREA Chile","la":-35.42689,"lo":-71.667409,"r":"Maule","c":"Talca","u":"NO"},
-{"n":"Centro La Escalera","la":-35.426103,"lo":-71.645748,"r":"Maule","c":"Talca","u":"NO"},
-{"n":"Centro Reproductivo Regional de Sangre","la":-35.424841,"lo":-71.664407,"r":"Maule","c":"Talca","u":"NO"},
-{"n":"Hospital Dr. César Garavagno Burotto (Talca)","la":-35.426896,"lo":-71.646373,"r":"Maule","c":"Talca","u":"SI"},
-{"n":"Hospital Presidente Carlos Ibáñez del Campo (Linares)","la":-35.844282,"lo":-71.590991,"r":"Maule","c":"Linares","u":"SI"},
-{"n":"Hospital San Juan de Dios (Curicó)","la":-34.978121,"lo":-71.213364,"r":"Maule","c":"Curicó","u":"SI"},
-{"n":"Nexos Ltda.","la":-35.409806,"lo":-71.65181,"r":"Maule","c":"Talca","u":"NO"},
-{"n":"Hospital Clínico Herminda Martín (Chillán)","la":-36.608831,"lo":-72.092671,"r":"Ñuble","c":"Chillán","u":"SI"},
-{"n":"Hospital de San Carlos","la":-36.429931,"lo":-71.959831,"r":"Ñuble","c":"San Carlos","u":"SI"},
-{"n":"Complejo Asistencial Dr. Víctor Ríos Ruiz (Los Ángeles)","la":-37.47365,"lo":-72.346903,"r":"Biobío","c":"Los Ángeles","u":"SI"},
-{"n":"Hospital Clínico Regional Dr. Guillermo Grant Benavente (Concepción)","la":-36.82511,"lo":-73.037951,"r":"Biobío","c":"Concepción","u":"SI"},
-{"n":"Hospital Las Higueras (Talcahuano)","la":-36.740101,"lo":-73.108694,"r":"Biobío","c":"Talcahuano","u":"SI"},
-{"n":"Hospital San José de Coronel","la":-37.028242,"lo":-73.135861,"r":"Biobío","c":"Coronel","u":"SI"},
-{"n":"Hospital de Lota","la":-37.09019,"lo":-73.155535,"r":"Biobío","c":"Lota","u":"SI"},
-{"n":"Hospital de Tomé","la":-36.613323,"lo":-72.954554,"r":"Biobío","c":"Tome","u":"SI"},
-{"n":"Hospital Dr. Hernán Henríquez Aravena (Temuco)","la":-38.736532,"lo":-72.599238,"r":"La Araucanía","c":"Temuco","u":"SI"},
-{"n":"Hospital Dr. Mauricio Heyermann (Angol)","la":-37.800539,"lo":-72.690635,"r":"La Araucanía","c":"Angol","u":"SI"},
-{"n":"Hospital San José de Victoria","la":-38.233942,"lo":-72.340159,"r":"La Araucanía","c":"Victoria","u":"SI"},
-{"n":"Hospital Base Valdivia","la":-39.831807,"lo":-73.240138,"r":"Los Ríos","c":"Valdivia","u":"SI"},
-{"n":"Hospital Base San José de Osorno","la":-40.5883,"lo":-73.127785,"r":"Los Lagos","c":"Osorno","u":"SI"},
-{"n":"Hospital de Castro","la":-42.477043,"lo":-73.76933,"r":"Los Lagos","c":"Castro","u":"SI"},
-{"n":"Hospital de Puerto Montt","la":-41.44855,"lo":-72.957342,"r":"Los Lagos","c":"Puerto Montt","u":"SI"},
-{"n":"Hospital Regional de Coyhaique","la":-45.568399,"lo":-72.073423,"r":"Aysén","c":"Coyhaique","u":"SI"},
-{"n":"Hospital Clínico de Magallanes Dr. Lautaro Navarro Avaria","la":-53.12215,"lo":-70.896232,"r":"Magallanes","c":"Punta Arenas","u":"SI"},
-{"n":"Hospital FFAA Cirujano Guzmán","la":-53.149659,"lo":-70.897186,"r":"Magallanes","c":"Punta Arenas","u":"SI"}
+{"n":"Hospital Regional Dr. Juan Noé Crevani (Arica)","la":-18.482478,"lo":-70.312948,"r":"Arica y Parinacota","c":"Arica","u":"SI","t":"Hospital","dir":"Calle 18 de Septiembre 1000","tel":"582584592","ss":"Servicio de Salud Arica y Parinacota","niv":"Tercer Nivel","tu":"Urgencia Hospitalaria (UEH)"},
+{"n":"Hospital Dr. Ernesto Torres Galdames (Iquique)","la":-20.214354,"lo":-70.138931,"r":"Tarapacá","c":"Iquique","u":"SI","t":"Hospital","dir":"Calle Héroes de la Concepción 502","tel":"572575861","ss":"Servicio de Salud Tarapacá","niv":"Tercer Nivel","tu":"Urgencia Hospitalaria (UEH)"},
+{"n":"Centro Oncológico del Norte (CON)","la":-23.569147,"lo":-70.379095,"r":"Antofagasta","c":"Antofagasta","u":"SI","t":"Centro de Especialidades","dir":"Calle Los Pumas 10255","tel":"","ss":"Servicio de Salud Antofagasta","niv":"Segundo Nivel","tu":""},
+{"n":"Hospital Dr. Carlos Cisternas (Calama)","la":-22.445201,"lo":-68.918257,"r":"Antofagasta","c":"Calama","u":"SI","t":"Hospital","dir":"Avenida Almirante Grau 1490","tel":"552655700","ss":"Servicio de Salud Antofagasta","niv":"Tercer Nivel","tu":"Urgencia Hospitalaria (UEH)"},
+{"n":"Hospital Dr. Leonardo Guzmán (Antofagasta)","la":-23.616852,"lo":-70.385924,"r":"Antofagasta","c":"Antofagasta","u":"SI","t":"Hospital","dir":"Avenida Azapa 5935","tel":"552204648","ss":"Servicio de Salud Antofagasta","niv":"Tercer Nivel","tu":"Urgencia Hospitalaria (UEH)"},
+{"n":"Hospital San José del Carmen (Copiapó)","la":-27.373352,"lo":-70.322127,"r":"Atacama","c":"Copiapó","u":"SI","t":"Hospital","dir":"Calle Los Carrera 1320","tel":"522465600","ss":"Servicio de Salud Atacama","niv":"Tercer Nivel","tu":"Urgencia Hospitalaria (UEH)"},
+{"n":"Hospital Dr. Antonio Tirado Lanas de Ovalle","la":-30.599614,"lo":-71.200031,"r":"Coquimbo","c":"Ovalle","u":"SI","t":"Hospital","dir":"Avenida Manuel Peñafiel 1550","tel":"532663194","ss":"Servicio de Salud Coquimbo","niv":"Tercer Nivel","tu":"Urgencia Hospitalaria (UEH)"},
+{"n":"Hospital San Juan de Dios (La Serena)","la":-29.908191,"lo":-71.249732,"r":"Coquimbo","c":"La Serena","u":"SI","t":"Hospital","dir":"Calle Balmaceda 916","tel":"512333378","ss":"Servicio de Salud Coquimbo","niv":"Tercer Nivel","tu":"Urgencia Hospitalaria (UEH)"},
+{"n":"Hospital San Pablo (Coquimbo)","la":-29.968488,"lo":-71.337017,"r":"Coquimbo","c":"Coquimbo","u":"SI","t":"Hospital","dir":"Avenida Videla","tel":"512336715","ss":"Servicio de Salud Coquimbo","niv":"Tercer Nivel","tu":"Urgencia Hospitalaria (UEH)"},
+{"n":"Centro de Sangre y Tejidos IV y V Región","la":-33.052658,"lo":-71.609776,"r":"Valparaíso","c":"Valparaíso","u":"NO","t":"Centro de Especialidades","dir":"Calle Blas Cuevas 985","tel":"322257660","ss":"SS Valparaíso San Antonio","niv":"Segundo Nivel","tu":""},
+{"n":"Hospital Biprovincial Quillota Petorca","la":-32.901916,"lo":-71.252111,"r":"Valparaíso","c":"Quillota","u":"SI","t":"Hospital","dir":"Calle O'Higgins 2200","tel":"5633229800","ss":"SS Viña del Mar Quillota","niv":"Tercer Nivel","tu":"Urgencia Hospitalaria (UEH)"},
+{"n":"Hospital Carlos Van Buren (Valparaíso)","la":-33.050258,"lo":-71.611098,"r":"Valparaíso","c":"Valparaíso","u":"SI","t":"Hospital","dir":"Calle San Ignacio 725","tel":"322204000","ss":"SS Valparaíso San Antonio","niv":"Tercer Nivel","tu":"Urgencia Hospitalaria (UEH)"},
+{"n":"Hospital Claudio Vicuña (San Antonio)","la":-33.588809,"lo":-71.608623,"r":"Valparaíso","c":"San Antonio","u":"SI","t":"Hospital","dir":"Calle Carmen Guerrero 945","tel":"322212244","ss":"SS Valparaíso San Antonio","niv":"Tercer Nivel","tu":"Urgencia Hospitalaria (UEH)"},
+{"n":"Hospital Dr. Eduardo Pereira Ramírez (Valparaíso)","la":-33.05679,"lo":-71.58962,"r":"Valparaíso","c":"Valparaíso","u":"NO","t":"Hospital","dir":"Calle Ibsen","tel":"322577310","ss":"SS Valparaíso San Antonio","niv":"Tercer Nivel","tu":""},
+{"n":"Hospital Dr. Gustavo Fricke (Viña del Mar)","la":-33.0294,"lo":-71.541725,"r":"Valparaíso","c":"Viña del Mar","u":"SI","t":"Hospital","dir":"Calle Álvarez 1532","tel":"322577571","ss":"SS Viña del Mar Quillota","niv":"Tercer Nivel","tu":"Urgencia Hospitalaria (UEH)"},
+{"n":"Hospital Naval Almirante Neff","la":-32.998382,"lo":-71.54382,"r":"Valparaíso","c":"Viña del Mar","u":"SI","t":"Hospital","dir":"Calle Subida Alessandri","tel":"322573047","ss":"SEREMI de Salud de Valparaíso","niv":"Tercer Nivel","tu":"Urgencia Hospitalaria (UEH)"},
+{"n":"Hospital San Camilo de San Felipe","la":-32.74977,"lo":-70.708992,"r":"Valparaíso","c":"San Felipe","u":"SI","t":"Hospital","dir":"Calle Miraflores 2085","tel":"342493307","ss":"Servicio de Salud Aconcagua","niv":"Tercer Nivel","tu":"Urgencia Hospitalaria (UEH)"},
+{"n":"Hospital San Juan de Dios (Los Andes)","la":-32.829664,"lo":-70.59643,"r":"Valparaíso","c":"Los Andes","u":"SI","t":"Hospital","dir":"Avenida Argentina 315","tel":"342490300","ss":"Servicio de Salud Aconcagua","niv":"Tercer Nivel","tu":"Urgencia Hospitalaria (UEH)"},
+{"n":"Hospital de Quilpué","la":-33.051961,"lo":-71.433933,"r":"Valparaíso","c":"Quilpué","u":"SI","t":"Hospital","dir":"Calle San Martín 1270","tel":"322759010","ss":"SS Viña del Mar Quillota","niv":"Tercer Nivel","tu":"Urgencia Hospitalaria (UEH)"},
+{"n":"Centro de Sangre y Tejidos Metropolitano","la":-33.41889,"lo":-70.605024,"r":"Metropolitana","c":"Providencia","u":"NO","t":"Centro de Especialidades","dir":"Avenida Vitacura 115","tel":"225681506","ss":"SS Metropolitano Sur Oriente","niv":"Segundo Nivel","tu":""},
+{"n":"Centro Metropolitano de Atención Prehospitalaria (SAMU)","la":-33.437666,"lo":-70.644218,"r":"Metropolitana","c":"Santiago","u":"SI","t":"SAMU","dir":"Calle Nueva Bueras 176","tel":"232204845","ss":"SS Metropolitano Central","niv":"Primer Nivel","tu":""},
+{"n":"Centro de Imagenología Mamaria Metropolitano","la":-33.484821,"lo":-70.644294,"r":"Metropolitana","c":"San Miguel","u":"NO","t":"Centro de Especialidades","dir":"Av. Gran Avenida J.M. Carrera 3204","tel":"","ss":"SS Metropolitano Sur","niv":"Segundo Nivel","tu":""},
+{"n":"Complejo Hospitalario Dr. Sótero del Río (Puente Alto)","la":-33.577251,"lo":-70.581781,"r":"Metropolitana","c":"Puente Alto","u":"SI","t":"Hospital","dir":"Avenida Concha y Toro 3459","tel":"223536000","ss":"SS Metropolitano Sur Oriente","niv":"Tercer Nivel","tu":"Urgencia Hospitalaria (UEH)"},
+{"n":"Complejo Hospitalario San José (Independencia)","la":-33.416586,"lo":-70.653318,"r":"Metropolitana","c":"Independencia","u":"SI","t":"Hospital","dir":"Calle San José 1196","tel":"225680000","ss":"SS Metropolitano Norte","niv":"Tercer Nivel","tu":"Urgencia Hospitalaria (UEH)"},
+{"n":"Hospital Félix Bulnes Cerda","la":-33.423625,"lo":-70.741664,"r":"Metropolitana","c":"Cerro Navia","u":"SI","t":"Hospital","dir":"Calle Mapocho 7432","tel":"225744400","ss":"SS Metropolitano Occidente","niv":"Tercer Nivel","tu":"Urgencia Hospitalaria (UEH)"},
+{"n":"Hospital Barros Luco Trudeau (San Miguel)","la":-33.485147,"lo":-70.644439,"r":"Metropolitana","c":"San Miguel","u":"SI","t":"Hospital","dir":"Av. Gran Avenida J.M. Carrera 3204","tel":"225763700","ss":"SS Metropolitano Sur","niv":"Tercer Nivel","tu":"Urgencia Hospitalaria (UEH)"},
+{"n":"Hospital Carabineros","la":-33.450658,"lo":-70.608463,"r":"Metropolitana","c":"Ñuñoa","u":"SI","t":"Hospital","dir":"Calle Simón Bolívar 2200","tel":"228700000","ss":"SEREMI Metropolitana","niv":"Tercer Nivel","tu":"Urgencia Hospitalaria (UEH)"},
+{"n":"Hospital Clínico Metropolitano El Carmen (Maipú)","la":-33.508212,"lo":-70.774248,"r":"Metropolitana","c":"Maipú","u":"SI","t":"Hospital","dir":"Camino a Rinconada, Av. El Olimpo 1201","tel":"226120491","ss":"SS Metropolitano Central","niv":"Tercer Nivel","tu":"Urgencia Hospitalaria (UEH)"},
+{"n":"Hospital Clínico Metropolitano La Florida","la":-33.514161,"lo":-70.599148,"r":"Metropolitana","c":"La Florida","u":"SI","t":"Hospital","dir":"Calle Froilán Roa 6542","tel":"225681880","ss":"SS Metropolitano Sur Oriente","niv":"Tercer Nivel","tu":"Urgencia Hospitalaria (UEH)"},
+{"n":"Hospital Clínico San Borja Arriarán","la":-33.460498,"lo":-70.64232,"r":"Metropolitana","c":"Santiago","u":"SI","t":"Hospital","dir":"Calle Santa Rosa 1234","tel":"225749000","ss":"SS Metropolitano Central","niv":"Tercer Nivel","tu":"Urgencia Hospitalaria (UEH)"},
+{"n":"Hospital Clínico Universidad de Chile","la":-33.420057,"lo":-70.653116,"r":"Metropolitana","c":"Independencia","u":"SI","t":"Hospital","dir":"Calle Santos Dumont 999","tel":"229788551","ss":"SEREMI Metropolitana","niv":"Tercer Nivel","tu":"Urgencia Hospitalaria (UEH)"},
+{"n":"Hospital Clínico de Niños Dr. Roberto del Río","la":-33.415335,"lo":-70.655086,"r":"Metropolitana","c":"Independencia","u":"SI","t":"Hospital","dir":"Avenida Profesor Zañartu 1085","tel":"225758000","ss":"SS Metropolitano Norte","niv":"Tercer Nivel","tu":"Urgencia Hospitalaria (UEH)"},
+{"n":"Hospital Del Salvador de Santiago","la":-33.43664,"lo":-70.624493,"r":"Metropolitana","c":"Providencia","u":"SI","t":"Hospital","dir":"Avenida Salvador 364","tel":"225754000","ss":"SS Metropolitano Oriente","niv":"Tercer Nivel","tu":"Urgencia Hospitalaria (UEH)"},
+{"n":"Hospital Dipreca Teniente Hernán Merino","la":-33.417683,"lo":-70.528194,"r":"Metropolitana","c":"Las Condes","u":"SI","t":"Hospital","dir":"Avenida Vital Apoquindo 1200","tel":"222401282","ss":"SEREMI Metropolitana","niv":"Tercer Nivel","tu":"Urgencia Hospitalaria (UEH)"},
+{"n":"Hospital Dr. Exequiel González Cortés (San Miguel)","la":-33.484761,"lo":-70.648129,"r":"Metropolitana","c":"San Miguel","u":"SI","t":"Hospital","dir":"Av. Gran Avenida J.M. Carrera 3300","tel":"225765700","ss":"SS Metropolitano Sur","niv":"Tercer Nivel","tu":"Urgencia Hospitalaria (UEH)"},
+{"n":"Hospital Dr. Luis Tisné B. (Peñalolén)","la":-33.501328,"lo":-70.579408,"r":"Metropolitana","c":"Peñalolén","u":"SI","t":"Hospital","dir":"Avenida Las Torres 5150","tel":"224725200","ss":"SS Metropolitano Oriente","niv":"Tercer Nivel","tu":"Urgencia Hospitalaria (UEH)"},
+{"n":"Hospital El Pino (San Bernardo)","la":-33.58435,"lo":-70.676793,"r":"Metropolitana","c":"San Bernardo","u":"SI","t":"Hospital","dir":"Avenida Padre Hurtado 13560","tel":"225767600","ss":"SS Metropolitano Sur","niv":"Tercer Nivel","tu":"Urgencia Hospitalaria (UEH)"},
+{"n":"Hospital FACH","la":-33.395327,"lo":-70.548074,"r":"Metropolitana","c":"Las Condes","u":"SI","t":"Hospital","dir":"Avenida Las Condes 8631","tel":"227826000","ss":"SEREMI Metropolitana","niv":"Tercer Nivel","tu":"Urgencia Hospitalaria (UEH)"},
+{"n":"Hospital Metropolitano (Ex Militar)","la":-33.418942,"lo":-70.605168,"r":"Metropolitana","c":"Providencia","u":"NO","t":"Hospital","dir":"Calle Holanda 50","tel":"","ss":"SS Metropolitano Oriente","niv":"Tercer Nivel","tu":""},
+{"n":"Hospital Militar de Santiago","la":-33.450493,"lo":-70.538184,"r":"Metropolitana","c":"La Reina","u":"SI","t":"Hospital","dir":"Avenida Larraín 9100","tel":"223653000","ss":"SEREMI Metropolitana","niv":"Tercer Nivel","tu":"Urgencia Hospitalaria (UEH)"},
+{"n":"Hospital Padre Alberto Hurtado (San Ramón)","la":-33.5525,"lo":-70.635024,"r":"Metropolitana","c":"San Ramón","u":"SI","t":"Hospital","dir":"Calle Esperanza 2150","tel":"225760600","ss":"SS Metropolitano Sur Oriente","niv":"Tercer Nivel","tu":"Urgencia Hospitalaria (UEH)"},
+{"n":"Hospital Parroquial de San Bernardo","la":-33.592835,"lo":-70.697393,"r":"Metropolitana","c":"San Bernardo","u":"SI","t":"Hospital","dir":"Calle Libertador Bernardo O'Higgins 4","tel":"223732500","ss":"SS Metropolitano Sur","niv":"Tercer Nivel","tu":"Urgencia Hospitalaria (UEH)"},
+{"n":"Hospital San José (Melipilla)","la":-33.69526,"lo":-71.214668,"r":"Metropolitana","c":"Melipilla","u":"SI","t":"Hospital","dir":"Calle O'Higgins 551","tel":"225745555","ss":"SS Metropolitano Occidente","niv":"Tercer Nivel","tu":"Urgencia Hospitalaria (UEH)"},
+{"n":"Hospital San Juan de Dios (Santiago)","la":-33.442394,"lo":-70.679188,"r":"Metropolitana","c":"Santiago","u":"SI","t":"Hospital","dir":"Calle Huérfanos 3255","tel":"225741900","ss":"SS Metropolitano Occidente","niv":"Tercer Nivel","tu":"Urgencia Hospitalaria (UEH)"},
+{"n":"Hospital de Niños Dr. Luis Calvo Mackenna","la":-33.429848,"lo":-70.614527,"r":"Metropolitana","c":"Providencia","u":"SI","t":"Hospital","dir":"Avenida Antonio Varas 360","tel":"225755800","ss":"SS Metropolitano Oriente","niv":"Tercer Nivel","tu":"Urgencia Hospitalaria (UEH)"},
+{"n":"Hospital de Urgencia Asistencia Pública Dr. Alejandro del Río","la":-33.444004,"lo":-70.637955,"r":"Metropolitana","c":"Santiago","u":"SI","t":"Hospital","dir":"Avenida Portugal 125","tel":"224681100","ss":"SS Metropolitano Central","niv":"Tercer Nivel","tu":"Urgencia Hospitalaria (UEH)"},
+{"n":"Instituto Nacional Geriátrico Pdte. Eduardo Frei Montalva","la":-33.434825,"lo":-70.622227,"r":"Metropolitana","c":"Providencia","u":"NO","t":"Hospital","dir":"Calle José Manuel Infante 370","tel":"225754459","ss":"SS Metropolitano Oriente","niv":"Tercer Nivel","tu":"Hospitalaria Especializada"},
+{"n":"Instituto Nacional de Enfermedades Respiratorias y Cirugía Torácica","la":-33.437988,"lo":-70.621882,"r":"Metropolitana","c":"Providencia","u":"NO","t":"Hospital","dir":"Calle José Manuel Infante 717","tel":"225755000","ss":"SS Metropolitano Oriente","niv":"Tercer Nivel","tu":"Hospitalaria Especializada"},
+{"n":"Instituto Nacional de Rehabilitación Infantil Pdte. Pedro Aguirre Cerda","la":-33.460454,"lo":-70.569892,"r":"Metropolitana","c":"Peñalolén","u":"NO","t":"Hospital","dir":"Avenida José Arrieta 5969","tel":"225754350","ss":"SS Metropolitano Oriente","niv":"Tercer Nivel","tu":"Hospitalaria Especializada"},
+{"n":"Instituto Nacional del Cáncer Dr. Caupolicán Pardo Correa","la":-33.418128,"lo":-70.652105,"r":"Metropolitana","c":"Independencia","u":"NO","t":"Hospital","dir":"Avenida Profesor Zañartu 1010","tel":"225757100","ss":"SS Metropolitano Norte","niv":"Tercer Nivel","tu":"Hospitalaria Especializada"},
+{"n":"Instituto Psiquiátrico Dr. José Horwitz Barak","la":-33.422402,"lo":-70.650537,"r":"Metropolitana","c":"Recoleta","u":"NO","t":"Hospital","dir":"Avenida La Paz 841","tel":"225758850","ss":"SS Metropolitano Norte","niv":"Tercer Nivel","tu":"Hospitalaria Especializada"},
+{"n":"Instituto Traumatológico Dr. Teodoro Gebauer","la":-33.434891,"lo":-70.658236,"r":"Metropolitana","c":"Santiago","u":"SI","t":"Hospital","dir":"Avenida San Martín 771","tel":"225746150","ss":"SS Metropolitano Occidente","niv":"Tercer Nivel","tu":"Hospitalaria Especializada"},
+{"n":"Instituto de Neurocirugía Dr. Alfonso Asenjo","la":-33.436888,"lo":-70.622448,"r":"Metropolitana","c":"Providencia","u":"SI","t":"Hospital","dir":"Avenida José M. Infante 553","tel":"225754600","ss":"SS Metropolitano Oriente","niv":"Tercer Nivel","tu":"Hospitalaria Especializada"},
+{"n":"Hospital Dr. Franco Ravera Zunino","la":-34.155358,"lo":-70.766723,"r":"O'Higgins","c":"Rancagua","u":"SI","t":"Hospital","dir":"Calle Alameda 611","tel":"722728157","ss":"SS Del Libertador B.O'Higgins","niv":"Tercer Nivel","tu":"Urgencia Hospitalaria (UEH)"},
+{"n":"Hospital San Juan de Dios de San Fernando","la":-34.575908,"lo":-70.992563,"r":"O'Higgins","c":"San Fernando","u":"SI","t":"Hospital","dir":"Calle Negrete 1401","tel":"722335100","ss":"SS Del Libertador B.O'Higgins","niv":"Tercer Nivel","tu":"Urgencia Hospitalaria (UEH)"},
+{"n":"CREA Chile","la":-35.42689,"lo":-71.667409,"r":"Maule","c":"Talca","u":"NO","t":"Centro de Especialidades","dir":"Calle 1 Sur 626","tel":"712212691","ss":"Servicio de Salud Del Maule","niv":"Segundo Nivel","tu":""},
+{"n":"Centro La Escalera","la":-35.426103,"lo":-71.645748,"r":"Maule","c":"Talca","u":"NO","t":"Centro de Especialidades","dir":"Calle 17 Norte 2745","tel":"712213016","ss":"Servicio de Salud Del Maule","niv":"Segundo Nivel","tu":""},
+{"n":"Centro Reproductivo Regional de Sangre","la":-35.424841,"lo":-71.664407,"r":"Maule","c":"Talca","u":"NO","t":"Centro de Especialidades","dir":"Calle 1 Norte","tel":"712209240","ss":"Servicio de Salud Del Maule","niv":"Segundo Nivel","tu":""},
+{"n":"Hospital Dr. César Garavagno Burotto (Talca)","la":-35.426896,"lo":-71.646373,"r":"Maule","c":"Talca","u":"SI","t":"Hospital","dir":"Calle 1 Norte 1990","tel":"712747000","ss":"Servicio de Salud Del Maule","niv":"Tercer Nivel","tu":"Urgencia Hospitalaria (UEH)"},
+{"n":"Hospital Presidente Carlos Ibáñez del Campo (Linares)","la":-35.844282,"lo":-71.590991,"r":"Maule","c":"Linares","u":"SI","t":"Hospital","dir":"Avenida Brasil 753","tel":"732566500","ss":"Servicio de Salud Del Maule","niv":"Tercer Nivel","tu":"Urgencia Hospitalaria (UEH)"},
+{"n":"Hospital San Juan de Dios (Curicó)","la":-34.978121,"lo":-71.213364,"r":"Maule","c":"Curicó","u":"SI","t":"Hospital","dir":"Calle Chacabuco 121","tel":"752565900","ss":"Servicio de Salud Del Maule","niv":"Tercer Nivel","tu":"Urgencia Hospitalaria (UEH)"},
+{"n":"Nexos Ltda.","la":-35.409806,"lo":-71.65181,"r":"Maule","c":"Talca","u":"NO","t":"Centro de Especialidades","dir":"Calle 13 Norte","tel":"712212863","ss":"Servicio de Salud Del Maule","niv":"Segundo Nivel","tu":""},
+{"n":"Hospital Clínico Herminda Martín (Chillán)","la":-36.608831,"lo":-72.092671,"r":"Ñuble","c":"Chillán","u":"SI","t":"Hospital","dir":"Calle Francisco Ramírez 10","tel":"422586792","ss":"Servicio de Salud Ñuble","niv":"Tercer Nivel","tu":"Urgencia Hospitalaria (UEH)"},
+{"n":"Hospital de San Carlos","la":-36.429931,"lo":-71.959831,"r":"Ñuble","c":"San Carlos","u":"SI","t":"Hospital","dir":"Calle Gazmuri 448","tel":"422586192","ss":"Servicio de Salud Ñuble","niv":"Tercer Nivel","tu":"Urgencia Hospitalaria (UEH)"},
+{"n":"Complejo Asistencial Dr. Víctor Ríos Ruiz (Los Ángeles)","la":-37.47365,"lo":-72.346903,"r":"Biobío","c":"Los Ángeles","u":"SI","t":"Hospital","dir":"Avenida Ricardo Vicuña 147","tel":"432336000","ss":"Servicio de Salud Biobío","niv":"Tercer Nivel","tu":"Urgencia Hospitalaria (UEH)"},
+{"n":"Hospital Clínico Regional Dr. Guillermo Grant Benavente (Concepción)","la":-36.82511,"lo":-73.037951,"r":"Biobío","c":"Concepción","u":"SI","t":"Hospital","dir":"Calle San Martín 1436","tel":"412417588","ss":"Servicio de Salud Concepción","niv":"Tercer Nivel","tu":"Urgencia Hospitalaria (UEH)"},
+{"n":"Hospital Las Higueras (Talcahuano)","la":-36.740101,"lo":-73.108694,"r":"Biobío","c":"Talcahuano","u":"SI","t":"Hospital","dir":"Calle Alto Horno 777","tel":"412687000","ss":"Servicio de Salud Talcahuano","niv":"Tercer Nivel","tu":"Urgencia Hospitalaria (UEH)"},
+{"n":"Hospital San José de Coronel","la":-37.028242,"lo":-73.135861,"r":"Biobío","c":"Coronel","u":"SI","t":"Hospital","dir":"Calle Lautaro 600","tel":"412413306","ss":"Servicio de Salud Concepción","niv":"Tercer Nivel","tu":"Urgencia Hospitalaria (UEH)"},
+{"n":"Hospital de Lota","la":-37.09019,"lo":-73.155535,"r":"Biobío","c":"Lota","u":"SI","t":"Hospital","dir":"Calle Carrera 702","tel":"412411249","ss":"Servicio de Salud Concepción","niv":"Tercer Nivel","tu":"Urgencia Hospitalaria (UEH)"},
+{"n":"Hospital de Tomé","la":-36.613323,"lo":-72.954554,"r":"Biobío","c":"Tome","u":"SI","t":"Hospital","dir":"Calle O'Higgins 1633","tel":"412724950","ss":"Servicio de Salud Talcahuano","niv":"Tercer Nivel","tu":"Urgencia Hospitalaria (UEH)"},
+{"n":"Hospital Dr. Hernán Henríquez Aravena (Temuco)","la":-38.736532,"lo":-72.599238,"r":"La Araucanía","c":"Temuco","u":"SI","t":"Hospital","dir":"Calle Montt 115","tel":"452296537","ss":"SS Araucanía Sur","niv":"Tercer Nivel","tu":"Urgencia Hospitalaria (UEH)"},
+{"n":"Hospital Dr. Mauricio Heyermann (Angol)","la":-37.800539,"lo":-72.690635,"r":"La Araucanía","c":"Angol","u":"SI","t":"Hospital","dir":"Calle Ilabaca 752","tel":"452551111","ss":"SS Araucanía Norte","niv":"Tercer Nivel","tu":"Urgencia Hospitalaria (UEH)"},
+{"n":"Hospital San José de Victoria","la":-38.233942,"lo":-72.340159,"r":"La Araucanía","c":"Victoria","u":"SI","t":"Hospital","dir":"Calle Dartnell 1100","tel":"452555929","ss":"SS Araucanía Norte","niv":"Tercer Nivel","tu":"Urgencia Hospitalaria (UEH)"},
+{"n":"Hospital Base Valdivia","la":-39.831807,"lo":-73.240138,"r":"Los Ríos","c":"Valdivia","u":"SI","t":"Hospital","dir":"Calle Bueras 1003","tel":"632263390","ss":"Servicio de Salud Los Ríos","niv":"Tercer Nivel","tu":"Urgencia Hospitalaria (UEH)"},
+{"n":"Hospital Base San José de Osorno","la":-40.5883,"lo":-73.127785,"r":"Los Lagos","c":"Osorno","u":"SI","t":"Hospital","dir":"Calle Guillermo Bühler 1765","tel":"642336200","ss":"Servicio de Salud Osorno","niv":"Tercer Nivel","tu":"Urgencia Hospitalaria (UEH)"},
+{"n":"Hospital de Castro","la":-42.477043,"lo":-73.76933,"r":"Los Lagos","c":"Castro","u":"SI","t":"Hospital","dir":"Calle Freire 852","tel":"652650548","ss":"Servicio de Salud Chiloé","niv":"Tercer Nivel","tu":"Urgencia Hospitalaria (UEH)"},
+{"n":"Hospital de Puerto Montt","la":-41.44855,"lo":-72.957342,"r":"Los Lagos","c":"Puerto Montt","u":"SI","t":"Hospital","dir":"Calle Los Aromos 63","tel":"652490010","ss":"SS Del Reloncaví","niv":"Tercer Nivel","tu":"Urgencia Hospitalaria (UEH)"},
+{"n":"Hospital Regional de Coyhaique","la":-45.568399,"lo":-72.073423,"r":"Aysén","c":"Coyhaique","u":"SI","t":"Hospital","dir":"Calle Jorge Ibar 68","tel":"672262003","ss":"Servicio de Salud Aysén","niv":"Tercer Nivel","tu":"Urgencia Hospitalaria (UEH)"},
+{"n":"Hospital Clínico de Magallanes Dr. Lautaro Navarro Avaria","la":-53.12215,"lo":-70.896232,"r":"Magallanes","c":"Punta Arenas","u":"SI","t":"Hospital","dir":"Calle Los Flamencos 1364","tel":"612293000","ss":"Servicio de Salud Magallanes","niv":"Tercer Nivel","tu":"Urgencia Hospitalaria (UEH)"},
+{"n":"Hospital FFAA Cirujano Guzmán","la":-53.149659,"lo":-70.897186,"r":"Magallanes","c":"Punta Arenas","u":"SI","t":"Hospital","dir":"Avenida Bulnes 256","tel":"612207500","ss":"SEREMI de Salud de Magallanes","niv":"Tercer Nivel","tu":"Urgencia Hospitalaria (UEH)"}
 ];
 
 // region order north to south
 const regionOrder = ["Arica y Parinacota","Tarapacá","Antofagasta","Atacama","Coquimbo","Valparaíso","Metropolitana","O'Higgins","Maule","Ñuble","Biobío","La Araucanía","Los Ríos","Los Lagos","Aysén","Magallanes"];
 
 // ═══ MAP ═══
-const chileBounds = L.latLngBounds(L.latLng(-56,-76), L.latLng(-17,-65));
+const chileBounds = L.latLngBounds(L.latLng(-56,-76), L.latLng(-17.4,-66.4));
 
 const map = L.map('mapGeo', {
   zoomControl: false,
   scrollWheelZoom: true,
-  maxBounds: chileBounds.pad(0.1),
-  maxBoundsViscosity: 0.8,
+  maxBounds: chileBounds.pad(0.05),
+  maxBoundsViscosity: 1.0,
   minZoom: 4
 }).fitBounds(L.latLngBounds(L.latLng(-55.5,-75.5), L.latLng(-17.5,-66.5)));
 
@@ -522,18 +548,26 @@ function makeIcon(active) {
   });
 }
 
+const svgPin = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>';
+const svgPhone = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6A19.79 19.79 0 012.12 4.18 2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>';
+const svgHosp = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18M9 8h6M12 5v6M9 21V12h6v9"/></svg>';
+
 hospitales.forEach((h, i) => {
   const urgTag = h.u === 'SI' ? '<span class="ptag ptag-urg">Urgencia</span>' : '';
-  const popup = `<div class="popup-inner"><h4>${h.n}</h4><p class="pmeta">${h.r} &mdash; ${h.c}</p><div class="ptags"><span class="ptag ptag-alta">Alta Complejidad</span>${urgTag}</div></div>`;
+  const nivTag = h.niv ? `<span class="ptag ptag-niv">${h.niv}</span>` : '';
+  const dirRow = h.dir ? `<div class="prow">${svgPin}<span>${h.dir}, ${h.c}</span></div>` : '';
+  const telRow = h.tel ? `<div class="prow">${svgPhone}<span>${h.tel}</span></div>` : '';
+  const ssRow = h.ss ? `<div class="prow">${svgHosp}<span>${h.ss}</span></div>` : '';
+  const details = (dirRow || telRow || ssRow) ? `<div class="pdetails">${dirRow}${telRow}${ssRow}</div>` : '';
+  const popup = `<div class="popup-inner"><h4>${h.n}</h4><p class="pmeta">${h.t} &mdash; ${h.r}, ${h.c}</p>${details}<div class="ptags"><span class="ptag ptag-alta">Alta Complejidad</span>${urgTag}${nivTag}</div></div>`;
   const marker = L.marker([h.la, h.lo], { icon: makeIcon(false) })
     .addTo(map)
-    .bindPopup(popup, { maxWidth: 280, closeButton: true });
+    .bindPopup(popup, { maxWidth: 320, closeButton: true });
   markers[i] = marker;
   marker.on('click', () => selectHospital(i));
 });
 
 function selectHospital(idx) {
-  // reset previous
   if (activeMarker !== null) markers[activeMarker].setIcon(makeIcon(false));
   if (activeItem) activeItem.classList.remove('active');
 
@@ -586,7 +620,7 @@ function buildList(filter) {
         <span class="hosp-dot"></span>
         <div class="hosp-info">
           <div class="hosp-name" title="${h.n}">${h.n}</div>
-          <div class="hosp-meta">${h.c}</div>
+          <div class="hosp-meta">${h.c} &mdash; ${h.t}</div>
           <div class="hosp-badges"><span class="hosp-badge" style="background:var(--rose-dark);color:white;">Alta</span>${urgBadge}</div>
         </div>`;
       div.addEventListener('click', () => selectHospital(h.idx));
@@ -594,7 +628,7 @@ function buildList(filter) {
     });
   });
 
-  document.getElementById('searchCount').textContent = `${count} Hospital${count !== 1 ? 'es' : ''} encontrado${count !== 1 ? 's' : ''}`;
+  document.getElementById('searchCount').textContent = `${count} establecimiento${count !== 1 ? 's' : ''} encontrado${count !== 1 ? 's' : ''}`;
 }
 
 buildList('');
@@ -605,6 +639,28 @@ let debounce;
 searchInput.addEventListener('input', () => {
   clearTimeout(debounce);
   debounce = setTimeout(() => buildList(searchInput.value), 150);
+});
+
+// ═══ FULLSCREEN TOGGLE ═══
+let isFullscreen = false;
+const mapSection = document.getElementById('mapa-geo');
+const fsBtn = document.getElementById('fullscreenBtn');
+const fsExpand = document.getElementById('fsIconExpand');
+const fsCollapse = document.getElementById('fsIconCollapse');
+
+fsBtn.addEventListener('click', () => {
+  isFullscreen = !isFullscreen;
+  mapSection.classList.toggle('fullscreen', isFullscreen);
+  fsExpand.style.display = isFullscreen ? 'none' : 'block';
+  fsCollapse.style.display = isFullscreen ? 'block' : 'none';
+  document.body.style.overflow = isFullscreen ? 'hidden' : '';
+  setTimeout(() => map.invalidateSize(), 300);
+});
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && isFullscreen) {
+    fsBtn.click();
+  }
 });
 
 // ═══ CAROUSEL DOTS ═══
