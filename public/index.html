@@ -275,6 +275,21 @@
     .source-box h4{font-size:.85rem;font-weight:700;margin-bottom:.5rem}
     .source-box p{font-size:.82rem;color:var(--text-light);line-height:1.6}
 
+    /* ── METODOLOGÍA ── */
+    .metodo-sec{background:var(--dark);color:white}
+    .metodo-sec .sec-label{color:var(--gold)}
+    .metodo-sec .sec-title{color:white;font-size:clamp(1.6rem,3.5vw,2.4rem)}
+    .metodo-sec .sec-desc{color:rgba(255,255,255,.55)}
+    .metodo-intro{font-size:.88rem;color:rgba(255,255,255,.65);line-height:1.7;max-width:860px;margin:1.5rem auto 2.5rem}
+    .metodo-grid{display:grid;grid-template-columns:1fr 1fr;gap:2rem}
+    .metodo-card{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:1.5rem}
+    .metodo-card h3{font-family:'DM Serif Display',serif;font-size:1rem;color:var(--gold);margin-bottom:.6rem}
+    .metodo-card p,.metodo-card li{font-size:.82rem;color:rgba(255,255,255,.6);line-height:1.65}
+    .metodo-card ul{padding-left:1.1rem;margin-top:.4rem}
+    .metodo-card li{margin-bottom:.3rem}
+    .metodo-link{display:inline-block;margin-top:1rem;color:var(--gold);font-size:.8rem;font-weight:600;text-decoration:none;border-bottom:1px solid rgba(201,169,110,.3);padding-bottom:2px;transition:border-color .3s}
+    .metodo-link:hover{border-color:var(--gold)}
+
     /* ── FOOTER ── */
     footer{background:var(--dark);padding:2.5rem 2rem;text-align:center}
     footer p{color:rgba(255,255,255,.35);font-size:.8rem}
@@ -288,6 +303,7 @@
       .findings-grid{grid-template-columns:1fr}
       .charts-grid{grid-template-columns:1fr}
       .team-grid{grid-template-columns:1fr}
+      .metodo-grid{grid-template-columns:1fr}
       .map-stats-overlay{flex-wrap:wrap}
       .region-bar{flex-wrap:nowrap;justify-content:flex-start;padding:.55rem .8rem;gap:.4rem}
       .region-tab{font-size:.72rem;padding:.35rem .7rem}
@@ -326,6 +342,7 @@
     <li><a href="#mapa-geo">Mapa de Chile</a></li>
     <li><a href="#implicancias">Implicancias</a></li>
     <li><a href="#equipo">Equipo</a></li>
+    <li><a href="#metodologia">Cómo lo hicimos</a></li>
     <li><a href="/analisis.html" style="color:var(--gold);">Análisis Regional</a></li>
   </ul>
 </nav>
@@ -545,6 +562,67 @@
         <p style="margin-top:.5rem"><strong>INE</strong> &mdash; Población estimada por región, 2026.</p>
       </div>
     </div>
+  </div>
+</section>
+
+<!-- ═══════════ CÓMO LO HICIMOS ═══════════ -->
+<section class="metodo-sec sec-full" id="metodologia">
+  <div class="sec-inner">
+    <span class="sec-label">Metodología</span>
+    <h2 class="sec-title">&iquest;Cómo lo hicimos?</h2>
+    <p class="metodo-intro">Para construir este observatorio integramos tres bases oficiales públicas correspondientes a Chile actualizada:
+      <strong>Base de Establecimientos de Salud</strong> (DEIS / MINSAL) con los 5.411 establecimientos públicos filtrados por nivel de complejidad;
+      <strong>Registro Nacional de Prestadores Individuales</strong> (RNPI / MINSAL) con más de 50.000 especialistas según región de desempeño; y
+      <strong>Proyecciones de Población</strong> (INE) para estandarizar tasas per cápita.</p>
+
+    <div class="metodo-grid">
+      <div class="metodo-card">
+        <h3>Decisiones de limpieza y transformación</h3>
+        <ul>
+          <li><strong>Estandarización de bases territoriales:</strong> Homologamos los códigos regionales (RegionCode) del 1 al 16 en todas las bases para realizar cruces a una clave nacional.</li>
+          <li><strong>Clasificación por nivel de complejidad:</strong> Agrupamos los recintos asistenciales según su nivel de atención para separar la red de baja y mediana complejidad del 2,4% de alta complejidad.</li>
+          <li><strong>Cálculo de la tasa por cada 100.000 habitantes:</strong> Dado que comparar números brutos entre territorios de distinto tamaño demográfico induce a un sesgo de escala.</li>
+          <li><strong>Filtrado de especialistas:</strong> Separamos la dotación médica de alta especialización y calculamos su distribución porcentual (ej: 53,6% concentrado en la Región Metropolitana).</li>
+        </ul>
+      </div>
+
+      <div class="metodo-card">
+        <h3>Límites del análisis</h3>
+        <p>Para mantener el rigor metodológico, declaramos explícitamente qué nuestros indicadores no miden:</p>
+        <ul>
+          <li><strong>Infraestructura física real:</strong> No capturamos metros cuadrados ni equipamiento. Contamos establecimientos y calculamos tasas por cada 100.000 habitantes.</li>
+          <li><strong>Demanda efectiva y tiempos de espera:</strong> Los datos reflejan oferta instalada registrada, pero no incorporan listas de espera ni tasas de ocupación hospitalaria.</li>
+          <li><strong>Movilidad y derivaciones interregionales:</strong> El indicador asigna los centros y especialistas a la región administrativa donde están ubicados, sin captar la atracción de derivaciones que ejerce la Región Metropolitana.</li>
+          <li><strong>Correlación descriptiva, no causalidad:</strong> Las brechas observadas describen desigualdades en la distribución territorial de recursos, sin aislar sus determinantes.</li>
+        </ul>
+      </div>
+
+      <div class="metodo-card">
+        <h3>Los cinco candidatos de hallazgo</h3>
+        <p>Durante la exploración inicial evaluamos cinco posibles ángulos para guiar la historia:</p>
+        <ul>
+          <li>Cantidad total de establecimientos públicos por región (descartado por mezclar postas rurales y CESFAM con hospitales de alta complejidad).</li>
+          <li>Porcentaje de establecimientos de baja complejidad sobre el total nacional (descartado como eje principal porque muestra que más del 90% de la red es baja complejidad, un dato esperado).</li>
+          <li>Ranking bruto de médicos especialistas por región (descartado como titular: sin corregir por tamaño poblacional reproduce el patrón esperado de Santiago como polo sanitario).</li>
+          <li>Regiones con un único hospital de alta complejidad (incorporado como hallazgo secundario de resiliencia territorial en cinco regiones).</li>
+          <li><strong>Tasa de alta complejidad por cada 100.000 habitantes</strong> (elegido), cruzada con la concentración de especialistas. Este fue el hallazgo que permite la intuición de que Santiago monopoliza la cobertura per cápita.</li>
+        </ul>
+      </div>
+
+      <div class="metodo-card">
+        <h3>Prueba con un usuario potencial</h3>
+        <p>Antes de publicar la versión final, pusimos a prueba el prototipo del sitio con un estudiante ajeno al proyecto (perfil público general de Demo Day):</p>
+        <ul>
+          <li>Qué entendió de inmediato: Captó la sorpresa entre Magallanes (1,20) y O&rsquo;Higgins (0,22) al ver las barras horizontales y entendió que los 35 hospitales de Santiago no significan mejor tasa por habitante.</li>
+          <li>Qué confundió o costó leer: Al principio no distinguía si el gráfico principal medía todos los consultorios y hospitales públicos o solo los de alta complejidad.</li>
+          <li>Cambio tras la prueba: Explicitamos &ldquo;centros de alta complejidad&rdquo; en todos los títulos y subtítulos, agregamos la línea punteada de referencia en 0,49 y simplificamos los tooltips iniciales para dejar una sola idea por visual.</li>
+        </ul>
+      </div>
+    </div>
+
+    <p style="margin-top:2rem;text-align:center">
+      <a class="metodo-link" href="https://colab.research.google.com/drive/1zj78zAR92hPxa2kk6W6txDeJoam-pharw" target="_blank">Ver el procesamiento completo en Google Colab &rarr;</a>
+    </p>
   </div>
 </section>
 
